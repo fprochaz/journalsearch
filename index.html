@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Communication Studies · Journal Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E8EAEE;        /* kühles Zeitungsgrau – Papier */
+  --paper-2:#F8F9FB;      /* Karten, fast weiß */
+  --ink:#16202E;          /* Druckerschwärze, blauschwarz */
+  --ink-soft:#4F5A6A;     /* sekundär */
+  --ink-faint:#828B98;
+  --line:#CDD2DA;         /* Haarlinien */
+  --line-2:#DEE2E8;
+  --accent:#1F5C8C;       /* Tintenblau – Primärakzent */
+  --accent-deep:#16456B;
+  --mark:#C0392B;         /* Korrekturrot – Treffer/Marker */
+  --mark-soft:#F3DAD6;
+  --danger:#A23226;
+  --radius:3px;
+  --shadow:0 1px 2px rgba(22,32,46,.05), 0 10px 26px -18px rgba(22,32,46,.35);
+  --mono:"Spectral", ui-monospace, "SF Mono", Menlo, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Inter", system-ui, sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Spectral", Georgia, serif;font-weight:500;letter-spacing:-.01em;margin:0}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);
+  font-family:ui-monospace,"SF Mono",Menlo,monospace;font-weight:500}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+
+/* ---------- Masthead ---------- */
+.masthead{
+  border-bottom:2px solid var(--ink);
+  background:linear-gradient(180deg,var(--paper-2),var(--paper));
+}
+.masthead-inner{max-width:1180px;margin:0 auto;padding:22px 26px 16px}
+.brand-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand h1{font-size:30px;line-height:1.05}
+.brand .sub{color:var(--ink-soft);font-size:13.5px;margin-top:4px;max-width:46ch}
+.brand .eyebrow{margin-bottom:6px}
+.status-strip{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--paper-2);overflow:hidden}
+.stat{padding:8px 16px;border-right:1px solid var(--line-2);min-width:84px}
+.stat:last-child{border-right:0}
+.stat .k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);
+  font-family:ui-monospace,monospace}
+.stat .v{font-family:"Spectral",serif;font-size:20px;font-weight:600;line-height:1.1;margin-top:2px}
+.stat .v.live::before{content:"●";color:var(--accent);font-size:9px;vertical-align:middle;margin-right:5px}
+
+.journals-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.jchip{font-size:11.5px;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);
+  border-radius:100px;padding:3px 10px;display:inline-flex;align-items:center;gap:6px}
+.jchip i{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);display:inline-block}
+.jchip.ok i{background:var(--accent)}
+.jchip.err i{background:var(--danger)}
+.jchip.off{opacity:.5;text-decoration:line-through;text-decoration-color:var(--ink-faint)}
+.jchip.off i{background:var(--ink-faint)}
+
+/* ---------- Tabs ---------- */
+nav.tabs{position:sticky;top:0;z-index:20;background:var(--paper);
+  border-bottom:1px solid var(--line);}
+.tabs-inner{max-width:1180px;margin:0 auto;padding:0 26px;display:flex;gap:2px}
+.tab{appearance:none;border:0;background:transparent;color:var(--ink-soft);
+  padding:13px 16px 11px;font-size:14px;font-weight:500;border-bottom:2px solid transparent;
+  margin-bottom:-1px;display:flex;align-items:center;gap:8px}
+.tab .n{font-family:ui-monospace,monospace;font-size:10px;color:var(--ink-faint)}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab[aria-selected="true"] .n{color:var(--accent)}
+.lang-toggle{margin-left:auto;align-self:center;border:1px solid var(--line);background:var(--paper-2);
+  color:var(--ink-soft);border-radius:100px;padding:4px 12px;font-size:12px;font-weight:600;
+  font-family:ui-monospace,monospace;letter-spacing:.04em}
+.lang-toggle:hover{border-color:var(--accent);color:var(--accent)}
+
+main{max-width:1180px;margin:0 auto;padding:26px}
+.panel{display:none}
+.panel.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- Cards / generic ---------- */
+.card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 22px;box-shadow:var(--shadow)}
+.card + .card{margin-top:18px}
+.card h2{font-size:19px;margin-bottom:3px}
+.card .lead{color:var(--ink-soft);font-size:13.5px;margin:0 0 16px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.grow{flex:1 1 auto}
+label.field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--ink-soft);font-weight:500}
+input[type=text],input[type=email],input[type=number],select,textarea{
+  font-family:inherit;font-size:14px;color:var(--ink);background:var(--paper-2);
+  border:1px solid var(--line);border-radius:var(--radius);padding:9px 11px;width:100%}
+textarea{resize:vertical;min-height:64px;line-height:1.45}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--accent);
+  background:var(--accent);color:#fff;border-radius:var(--radius);padding:9px 16px;
+  font-size:13.5px;font-weight:600;transition:background .15s}
+.btn:hover{background:var(--accent-deep)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:rgba(47,93,80,.07)}
+.btn.subtle{background:var(--paper);color:var(--ink);border-color:var(--line)}
+.btn.subtle:hover{background:#fff;border-color:var(--ink-faint)}
+.btn.sm{padding:6px 11px;font-size:12.5px}
+.btn.danger{border-color:var(--danger);color:var(--danger);background:transparent}
+.btn.danger:hover{background:rgba(154,59,46,.08)}
+
+/* progress */
+.progress-wrap{margin-top:16px;display:none}
+.progress-wrap.show{display:block}
+.bar{height:8px;background:var(--line-2);border-radius:100px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--mark));
+  transition:width .25s}
+.progress-label{font-size:12.5px;color:var(--ink-soft);margin-top:7px;font-family:ui-monospace,monospace}
+
+.notice{font-size:13px;border-left:3px solid var(--mark);background:var(--mark-soft);
+  padding:11px 14px;border-radius:0 var(--radius) var(--radius) 0;color:#6b5316;margin-top:14px}
+.notice.err{border-color:var(--danger);background:#f7e6e2;color:#7a2e22}
+
+/* ---------- Search ---------- */
+.searchbar{position:relative}
+.searchbar input{font-size:16px;padding:13px 15px 13px 42px}
+.searchbar svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ink-faint)}
+.filters{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:flex-end}
+.filters .field{min-width:120px}
+.result-meta{display:flex;justify-content:space-between;align-items:baseline;margin:20px 2px 12px;
+  flex-wrap:wrap;gap:10px}
+.result-count{font-family:"Spectral",serif;font-size:17px}
+.result-count b{font-weight:600}
+
+.article{padding:18px 0;border-top:1px solid var(--line-2)}
+.article:first-child{border-top:0}
+.article h3{font-size:17.5px;line-height:1.3;font-weight:500}
+.article h3 a{color:var(--ink)}
+.article h3 a:hover{color:var(--accent)}
+.amETA{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 8px;
+  font-size:12.5px;color:var(--ink-soft)}
+.amETA .dot{color:var(--line)}
+.amETA .jrnl{color:var(--accent);font-weight:600}
+.abstract{font-size:13.5px;color:#3b3f48;line-height:1.55;max-width:80ch}
+.abstract.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.toggle-abs{font-size:12px;color:var(--accent);background:none;border:0;padding:4px 0;margin-top:3px}
+mark{background:var(--mark-soft);color:#8a241a;padding:0 1px;border-radius:2px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.chip{font-size:11.5px;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);
+  border-radius:100px;padding:2px 9px;cursor:pointer}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.cited{font-variant-numeric:tabular-nums}
+
+.empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}
+.empty .big{font-family:"Spectral",serif;font-size:22px;color:var(--ink);margin-bottom:6px}
+
+/* ---------- Topic monitor ---------- */
+.subtabs{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:18px}
+.subtab{border:0;background:var(--paper-2);color:var(--ink-soft);padding:8px 16px;font-size:13px;font-weight:500;border-right:1px solid var(--line-2)}
+.subtab:last-child{border-right:0}
+.subtab[aria-selected="true"]{background:var(--ink);color:#fff}
+.subpanel{display:none}.subpanel.active{display:block}
+
+.chart-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.seg button{border:0;background:var(--paper-2);color:var(--ink-soft);padding:6px 12px;font-size:12.5px;border-right:1px solid var(--line-2)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+
+.chart-box{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 14px 10px;box-shadow:var(--shadow)}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line-2)}
+.legitem{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink)}
+.legitem i{width:14px;height:3px;border-radius:2px;display:inline-block}
+.legitem .ct{color:var(--ink-faint);font-family:ui-monospace,monospace;font-size:11px}
+
+.theme-grid{display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-top:16px}
+.theme-row{display:grid;grid-template-columns:26px 1fr auto auto;gap:12px;align-items:center;
+  padding:11px 14px;border-top:1px solid var(--line-2);background:var(--paper-2)}
+.theme-row:first-child{border-top:0}
+.theme-row .nm{font-weight:600;font-size:14px}
+.theme-row .terms{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+.theme-row .tot{font-family:ui-monospace,monospace;font-size:12px;color:var(--ink-soft);text-align:right}
+.swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12)}
+.spark{width:120px;height:30px}
+.linkbtn{background:none;border:0;color:var(--accent);font-size:12px;padding:4px 6px}
+.linkbtn:hover{text-decoration:underline}
+
+table.toptopics{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+table.toptopics th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);font-family:ui-monospace,monospace}
+table.toptopics td{padding:9px 10px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+table.toptopics tr:hover td{background:rgba(47,93,80,.04)}
+table.toptopics td.num{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink-soft)}
+table.toptopics input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
+
+.drill{margin-top:18px;border-top:2px solid var(--ink);padding-top:14px;display:none}
+.drill.show{display:block}
+.drill h3{font-size:16px;margin-bottom:4px}
+.drill .closebar{display:flex;justify-content:space-between;align-items:baseline}
+
+footer{max-width:1180px;margin:0 auto;padding:24px 26px 50px;color:var(--ink-faint);font-size:12px;
+  border-top:1px solid var(--line);margin-top:30px}
+footer code{background:var(--paper-2);border:1px solid var(--line-2);padding:1px 5px;border-radius:3px;
+  font-size:11.5px;color:var(--ink-soft)}
+
+/* chart svg */
+svg.linechart{width:100%;height:340px;display:block}
+svg.linechart .grid{stroke:var(--line-2);stroke-width:1}
+svg.linechart .axis{stroke:var(--line);stroke-width:1}
+svg.linechart .axlabel{fill:var(--ink-faint);font-size:11px;font-family:ui-monospace,monospace}
+svg.linechart .series{fill:none;stroke-width:2.2}
+svg.linechart .pt{stroke:#fff;stroke-width:1.5}
+svg.linechart .pt:hover{r:5.5}
+
+@media (max-width:760px){
+  main,.masthead-inner,.tabs-inner,footer{padding-left:16px;padding-right:16px}
+  .brand h1{font-size:24px}
+  .status-strip{width:100%}
+  .theme-row{grid-template-columns:22px 1fr auto;gap:8px}
+  .theme-row .spark{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- Netzwerk ---------- */
+.net-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.net-layout{display:grid;grid-template-columns:1fr 330px;gap:18px;margin-top:18px;align-items:start}
+.net-graph-card{padding:14px}
+.net-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.net-canvas{border:1px solid var(--line-2);border-radius:var(--radius);
+  background:radial-gradient(circle at 32% 18%, #fff, var(--paper-2));overflow:hidden;height:580px}
+.net-canvas svg{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+.net-canvas svg.grabbing{cursor:grabbing}
+.net-side{position:sticky;top:70px;max-height:84vh;overflow:auto}
+.central-item{padding:9px 2px;border-top:1px solid var(--line-2);cursor:pointer}
+.central-item:first-child{border-top:0}
+.central-item:hover{background:rgba(47,93,80,.05)}
+.central-item .ci-rank{font-family:ui-monospace,monospace;color:var(--ink-faint);font-size:11px}
+.central-item .ci-title{font-size:13px;font-weight:500;line-height:1.3;margin-top:1px}
+.central-item .ci-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+.central-item .ci-cit{color:var(--accent);font-weight:600}
+.netedge{stroke:#16202E;stroke-opacity:.10;stroke-width:1}
+.netnode{stroke:#fff;stroke-width:1;cursor:pointer;transition:opacity .15s}
+.netnode:hover{stroke:#16202E;stroke-width:1.6}
+.netnode.dim,.netedge.dim{opacity:.10}
+.netlabel{font-size:10px;fill:#16202E;font-family:ui-monospace,monospace;pointer-events:none}
+.net-side details{margin-top:6px}
+.net-side summary{cursor:pointer;font-size:12.5px;color:var(--ink-soft);padding:4px 0}
+@media (max-width:860px){.net-layout{grid-template-columns:1fr}.net-side{position:static;max-height:none}}
+
+/* ---------- Zeitschriften hinzufügen ---------- */
+.add-journal{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.tagcustom{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
+  border:1px solid var(--accent);border-radius:100px;padding:1px 7px;vertical-align:middle;font-family:ui-monospace,monospace}
+.jres{margin-top:10px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.jres-item{display:flex;align-items:center;gap:12px;justify-content:space-between;
+  padding:10px 14px;border-top:1px solid var(--line-2);background:var(--paper-2)}
+.jres-item:first-child{border-top:0}
+.jres-name{font-weight:600;font-size:13.5px}
+.jres-meta{font-size:11.5px;color:var(--ink-soft);margin-top:2px}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand-row">
+      <div class="brand">
+        <div class="eyebrow" data-i18n="masthead.eyebrow">OpenAlex</div>
+        <h1 data-i18n="masthead.title">Communication Studies — Journal Search</h1>
+        <div class="sub" data-i18n="masthead.sub">Searchable, continuously updated archive of selected leading communication-studies journals.</div>
+      </div>
+      <div class="status-strip" id="statusStrip">
+        <div class="stat"><div class="k" data-i18n="stat.articles">Articles</div><div class="v" id="stArticles">—</div></div>
+        <div class="stat"><div class="k" data-i18n="stat.range">Period</div><div class="v" id="stRange">—</div></div>
+        <div class="stat"><div class="k" data-i18n="stat.sync">Updated</div><div class="v live" id="stSync">—</div></div>
+      </div>
+    </div>
+    <div class="journals-row" id="journalsRow"></div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="tabs-inner" role="tablist">
+    <button class="tab" id="tabbtn-data" role="tab" aria-selected="true" aria-controls="tab-data">
+      <span class="n">01</span> <span data-i18n="tab.data">Data</span></button>
+    <button class="tab" id="tabbtn-search" role="tab" aria-selected="false" aria-controls="tab-search">
+      <span class="n">02</span> <span data-i18n="tab.search">Search</span></button>
+    <button class="lang-toggle" id="langToggle" title="Sprache / Language">DE</button>
+  </div>
+</nav>
+
+<main>
+  <!-- =================== DATEN =================== -->
+  <section class="panel active" id="tab-data" role="tabpanel" aria-labelledby="tabbtn-data">
+    <div class="card">
+      <h2 data-i18n="data.update.h2">Update the dataset</h2>
+      <p class="lead" data-i18n="data.update.lead">Fetches all articles from the selected journals directly from OpenAlex and stores them locally.</p>
+      <div class="row">
+        <label class="field grow" style="max-width:360px"><span data-i18n="data.apikey.label">OpenAlex API key (free, for full fetches)</span>
+          <input type="text" id="apikey" data-i18n-ph="data.apikey.ph" placeholder="Key from openalex.org/settings/api" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field" style="max-width:130px"><span data-i18n="data.yearsback.label">Years back</span>
+          <input type="number" id="yearsBack" min="1" max="130" value="10">
+        </label>
+      </div>
+      <p class="eyebrow" data-i18n-html="data.apikey.note" style="margin-top:8px;text-transform:none;letter-spacing:0;font-size:12px;line-height:1.5"></p>
+      <div class="row" style="margin-top:16px">
+        <button class="btn" id="btnFetch" data-i18n="btn.fetch">Load / update data</button>
+        <button class="btn subtle sm" id="btnFull" data-i18n="btn.full">Full reload</button>
+        <button class="btn danger sm" id="btnClear" data-i18n="btn.clear">Clear local storage</button>
+      </div>
+      <div class="progress-wrap" id="progWrap">
+        <div class="bar"><i id="progBar"></i></div>
+        <div class="progress-label" id="progLabel"></div>
+      </div>
+      <div id="dataNotice"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="data.journals.h2">Tracked journals</h2>
+      <p class="lead" data-i18n-html="data.journals.lead"></p>
+      <div id="sourcesTable"></div>
+    </div>
+
+    <div class="card" id="overviewCard" style="display:none">
+      <h2 data-i18n="data.overview.h2">Publication volume per year</h2>
+      <p class="lead" data-i18n="data.overview.lead">Number of tracked articles per journal and year — the baseline for all topic shares.</p>
+      <div class="chart-box"><div id="overviewChart"></div><div class="chart-legend" id="overviewLegend"></div></div>
+    </div>
+  </section>
+
+  <!-- =================== SUCHE =================== -->
+  <section class="panel" id="tab-search" role="tabpanel" aria-labelledby="tabbtn-search">
+    <div class="card">
+      <div class="searchbar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="q" data-i18n-ph="search.ph" placeholder='Search keyword, e.g.  "news avoidance"' autocomplete="off">
+      </div>
+      <div class="filters">
+        <label class="field"><span data-i18n="search.f.journal">Journal</span>
+          <select id="fJournal"><option value="">All journals</option></select>
+        </label>
+        <label class="field"><span data-i18n="search.f.yearfrom">From year</span>
+          <select id="fYearFrom"></select>
+        </label>
+        <label class="field"><span data-i18n="search.f.yearto">To year</span>
+          <select id="fYearTo"></select>
+        </label>
+        <label class="field"><span data-i18n="search.f.sort">Sort by</span>
+          <select id="fSort">
+            <option value="relevance" data-i18n="sort.relevance">Relevance</option>
+            <option value="newest" data-i18n="sort.newest">Newest first</option>
+            <option value="oldest" data-i18n="sort.oldest">Oldest first</option>
+            <option value="cited" data-i18n="sort.cited">Most cited</option>
+          </select>
+        </label>
+        <button class="btn subtle sm" id="btnCsv" data-i18n="btn.csv">Export CSV</button>
+      </div>
+    </div>
+    <div class="result-meta">
+      <div class="result-count" id="resultCount"></div>
+      <div class="eyebrow" id="resultHint"></div>
+    </div>
+    <div id="results"></div>
+  </section>
+
+</main>
+
+<footer data-i18n-html="footer"></footer>
+
+<script>
+"use strict";
+/* ============================================================
+   Konfiguration: Standard-Zeitschriften (dynamisch erweiterbar)
+   ============================================================ */
+const DEFAULT_JOURNALS = [
+  { key:"journalism",  name:"Journalism",                                 issns:["1464-8849","1741-3001"] },
+  { key:"jstudies",    name:"Journalism Studies",                         issns:["1461-670X","1469-9699"] },
+  { key:"jpractice",   name:"Journalism Practice",                        issns:["1751-2786","1751-2794"] },
+  { key:"jmcq",        name:"Journalism & Mass Communication Quarterly",  issns:["1077-6990","2161-430X"] },
+  { key:"digital",     name:"Digital Journalism",                         issns:["2167-0811","2167-082X"] },
+  { key:"commresearch",name:"Communication Research",                     issns:["0093-6502","1552-3810"] },
+  { key:"jcomm",       name:"Journal of Communication",                   issns:["0021-9916","1460-2466"] },
+  { key:"ijoc",        name:"International Journal of Communication",      issns:["1932-8036"] },
+  { key:"ics",         name:"Information, Communication & Society",       issns:["1369-118X","1468-4462"] },
+  { key:"smsociety",   name:"Social Media + Society",                     issns:["2056-3051"] },
+  { key:"newmedia",    name:"New Media & Society",                        issns:["1461-4448","1461-7315"] },
+];
+let JOURNALS = [];  // wird aus dem Speicher geladen oder aus DEFAULT_JOURNALS erstellt
+
+/* ============================================================
+   Mehrsprachigkeit (Standard: Englisch, umschaltbar auf Deutsch)
+   ============================================================ */
+let LANG = "en";
+let LOCALE = "en-US";
+const I18N = {
+ en:{
+  "page.title":"Communication Studies · Journal Search",
+  "masthead.eyebrow":"OpenAlex",
+  "masthead.title":"Communication Studies — Journal Search",
+  "masthead.sub":"Searchable, continuously updated archive of selected leading communication-studies journals — extendable with any further journals at any time. Keyword search runs across the titles and abstracts of every tracked article.",
+  "stat.articles":"Articles","stat.range":"Period","stat.sync":"Updated",
+  "tab.data":"Data","tab.search":"Search","tab.topics":"Topic monitor","tab.network":"Network",
+  "data.update.h2":"Update the dataset",
+  "data.update.lead":"Fetches all articles from the selected journals for the past years directly from OpenAlex and stores them locally in your browser. Next time, only new or changed entries are loaded.",
+  "data.apikey.label":"OpenAlex API key (free, for full fetches)",
+  "data.apikey.ph":"Key from openalex.org/settings/api",
+  "data.yearsback.label":"Years back",
+  "data.apikey.note":"It also works <b>without a key</b>, but OpenAlex then grants only about 100 credits per day — enough to try it out, not for a full fetch. A <i>credit</i> is a billing unit per request, not a result: one search request (up to 200 articles) costs 10 credits, so 100 credits cover roughly 2,000 articles. A free key at <a href=\"https://openalex.org/settings/api\" target=\"_blank\" rel=\"noopener\">openalex.org/settings/api</a> raises this to 100,000 credits/day (around two million articles) — ample for the full back catalogue. The key is stored locally in your browser.",
+  "btn.fetch":"Load / update data","btn.full":"Full reload","btn.clear":"Clear local storage",
+  "data.journals.h2":"Tracked journals",
+  "data.journals.lead":"Sources are resolved automatically via their ISSN at OpenAlex. If a match is wrong, you can add an OpenAlex source ID (e.g. <code class=\"mono\">S2764506816</code>) below.",
+  "data.overview.h2":"Publication volume per year",
+  "data.overview.lead":"Number of tracked articles per journal and year — the baseline for all topic shares.",
+  "search.ph":"Search keyword, e.g.  \"news avoidance\"  or  trust journalism",
+  "search.f.journal":"Journal","search.f.yearfrom":"From year","search.f.yearto":"To year","search.f.sort":"Sort by",
+  "search.f.alljournals":"All journals",
+  "sort.relevance":"Relevance","sort.newest":"Newest first","sort.oldest":"Oldest first","sort.cited":"Most cited",
+  "btn.csv":"Export CSV",
+  "sub.custom":"Custom keyword topics","sub.auto":"OpenAlex topics (automatic)",
+  "topics.custom.h2":"Track topic trajectories",
+  "topics.custom.lead":"Define a topic via search terms (several, comma-separated). The monitor counts in how many articles per year at least one of these terms appears in the title or abstract — revealing when a topic emerges, peaks or fades.",
+  "topics.themeName.label":"Topic name","topics.themeName.ph":"e.g. News Avoidance",
+  "topics.themeTerms.label":"Terms (comma-separated, phrases allowed)",
+  "btn.addtheme":"Add topic","topics.trend.h2":"Trajectory",
+  "seg.abs":"Absolute","seg.share":"Share\u00a0%",
+  "topics.auto.h2":"Automatic topic assignment",
+  "topics.auto.lead":"OpenAlex assigns content topics to each article. Pick up to eight to see their development over the years side by side.",
+  "drill.close":"close ✕",
+  "net.h2":"Citation network",
+  "net.lead":"Each dot is an article, each line means “cites”. Only citations <b>between the selected journals</b> are counted. The more often a work is cited from within the corpus, the larger its dot — so the central articles stand out. Colours mark groups connected through mutual citation (research strands), named after their most frequent OpenAlex topic.",
+  "net.q.label":"Keyword (optional, narrows the corpus)",
+  "net.min.label":"Min. citations in corpus","net.max.label":"Max. nodes","net.color.label":"Colour by",
+  "net.color.cluster":"Cluster","net.color.journal":"Journal","btn.net":"Build network",
+  "net.zoomin.title":"Zoom in","net.zoomout.title":"Zoom out","net.reset.title":"Reset view","btn.reset":"Reset",
+  "net.hint":"Drag to pan · scroll to zoom · click a dot for details",
+  "net.central.h3":"Central articles",
+  "net.central.lead":"Sorted by citations within the corpus. Click opens the article in the graph.",
+  "footer":"Data: <a href=\"https://openalex.org\" target=\"_blank\" rel=\"noopener\">OpenAlex</a> (CC0). This page runs entirely in your browser; all articles are stored locally (<code>IndexedDB</code>) and topped up incrementally on update. Abstracts come from the OpenAlex index and aren't available for every article depending on the publisher.",
+  "mem.warning":"Note: persistent local storage (IndexedDB) isn't available here — data is kept only for this session. Tip: open the file via a local server.",
+  "fetch.nokey":"Note: without a key, OpenAlex allows only ~100 credits/day (testing). For the full fetch, enter a free key above (openalex.org/settings/api).",
+  "prog.resolving":"Resolving sources …","prog.starting":"Fetch from OpenAlex starting …",
+  "prog.loaded":"{g} articles loaded …","prog.loadedTotal":"{g} / {t} articles loaded …",
+  "prog.fresh":"Loading newly added journal(s) in full …",
+  "prog.doneFull":"Done — {got} articles processed.","prog.doneInc":"Done — {got} new/updated articles processed.",
+  "fetch.ok":"Updated: {got} articles loaded. Active corpus: {n} articles.",
+  "fetch.none":"No new articles found — everything up to date.",
+  "fetch.fail":"Fetch failed: {msg}",
+  "fetch.noactive":"No active journal with a valid source. Please enable or resolve journals in the Data tab.",
+  "clear.confirm":"Delete all locally stored articles?","clear.ok":"Local storage cleared.",
+  "resolve.resolving":"Resolving sources …","resolve.ok":"Sources updated.","resolve.err":"Error: {msg}",
+  "src.th.active":"active","src.th.journal":"Journal","src.th.source":"OpenAlex source","src.th.tracked":"tracked","src.th.sourceid":"Source ID",
+  "src.notresolved":"not resolved","src.custom":"own","src.remove":"remove",
+  "src.removeConfirm":"Remove “{name}” from the list?\n(Already loaded articles stay in storage but are hidden.)",
+  "src.resolveBtn":"Resolve sources again",
+  "src.search.label":"Search another journal (name or ISSN)",
+  "src.search.ph":"e.g.  Communication Research  or  1940-1612","src.search.btn":"Search",
+  "jsearch.searching":"Searching OpenAlex …","jsearch.none":"No journal found. Try another name or the ISSN.",
+  "jsearch.works":"{n} works","jsearch.add":"Add","jsearch.inlist":"in list",
+  "jsearch.added":"“{name}” added. Click “Load / update data” to fetch its articles.",
+  "jsearch.fail":"Search failed: {msg}",
+  "theme.needinput":"Please enter a name and at least one term.","theme.added":"Topic “{name}” added.",
+  "theme.none":"No topic defined yet.","theme.articles":"Articles","theme.del":"Delete topic?",
+  "drill.themeTitle":"“{name}” — {n} articles",
+  "search.articlesWord":"articles","search.hint.matches":"Matches highlighted",
+  "search.empty.nodata.title":"No dataset yet",
+  "search.empty.nodata.body":"Switch to the <b>Data</b> tab and load the selected journals from OpenAlex.",
+  "search.empty.disabled.title":"All journals deselected",
+  "search.empty.disabled.body":"Enable at least one journal in the <b>Data</b> tab.",
+  "search.empty.nomatch.title":"No matches",
+  "search.empty.nomatch.body":"Try other keywords or reset the filters.",
+  "search.more":"Show {n} more ({rest} left)",
+  "art.cited":"{n}× cited","art.oa":"Open Access","art.noabstract":"No abstract in the OpenAlex index.",
+  "art.more":"more ▾","art.less":"less ▴","art.noyear":"n.d.",
+  "topics.auto.hint":"{n} topics · top 40 listed","topics.auto.nodata":"No data","topics.auto.loadfirst":"No data yet — please load first.",
+  "topics.th.topic":"Topic","topics.th.trend":"Trajectory","topics.th.total":"total","topics.th.trendcol":"Trend",
+  "drill.topicTitle":"Topic “{name}” — {n} articles",
+  "net.stats":"{nodes} nodes · {edges} citation edges · {groups} groups",
+  "net.nodata":"No data yet — please load in the Data tab.",
+  "net.norefs":"Citation links are missing for the network. Please do a “Full reload” once in the Data tab — then the links are captured.",
+  "net.toofew":"Too few linked articles at this threshold. Lower “Min. citations in corpus” or load more years.",
+  "net.group":"Group {n}","net.central.cited":"{n}× cited (corpus)","net.central.rank":"#{i} · ",
+  "net.detail.back":"← back to list","net.detail.incorpus":"{n}× in corpus","net.detail.total":"{n}× total",
+  "net.detail.citedby":"Cited by {n} in corpus","net.detail.cites":"Cites {n} in corpus",
+  "net.node.title":"{n}× cited in corpus","chart.nothing":"Nothing selected.",
+  "err.nokey":" — API key missing or invalid. Create a free key at openalex.org/settings/api and enter it above.",
+  "csv.noresults":"No results to export."
+ },
+ de:{
+  "page.title":"Kommunikationswissenschaft · Zeitschriften-Suche",
+  "masthead.eyebrow":"OpenAlex",
+  "masthead.title":"Kommunikationswissenschaft — Zeitschriften-Suche",
+  "masthead.sub":"Durchsuchbares, fortlaufend aktualisiertes Archiv ausgewählter Leitzeitschriften der Kommunikationswissenschaft — jederzeit um beliebige weitere Zeitschriften erweiterbar. Die Schlagwortsuche durchsucht Titel und Abstracts aller erfassten Aufsätze.",
+  "stat.articles":"Artikel","stat.range":"Zeitraum","stat.sync":"Stand",
+  "tab.data":"Daten","tab.search":"Suche","tab.topics":"Themen-Monitor","tab.network":"Netzwerk",
+  "data.update.h2":"Datenbestand aktualisieren",
+  "data.update.lead":"Holt alle Aufsätze der ausgewählten Zeitschriften der letzten Jahre direkt von OpenAlex und speichert sie lokal im Browser. Beim nächsten Mal werden nur neue oder geänderte Einträge nachgeladen.",
+  "data.apikey.label":"OpenAlex API-Key (kostenlos, für volle Abrufe)",
+  "data.apikey.ph":"Key aus openalex.org/settings/api",
+  "data.yearsback.label":"Jahre zurück",
+  "data.apikey.note":"Es funktioniert auch <b>ohne Key</b>, dann gewährt OpenAlex aber nur rund 100 Credits pro Tag — genug zum Ausprobieren, nicht für einen vollen Abruf. Ein <i>Credit</i> ist eine Abrechnungseinheit pro Anfrage, kein Treffer: Eine Suchanfrage (bis zu 200 Aufsätze) kostet 10 Credits, 100 Credits reichen also für etwa 2.000 Aufsätze. Ein kostenloser Key auf <a href=\"https://openalex.org/settings/api\" target=\"_blank\" rel=\"noopener\">openalex.org/settings/api</a> hebt das auf 100.000 Credits/Tag (rund zwei Millionen Aufsätze) — mehr als genug für den vollen Bestand. Der Key wird lokal im Browser gespeichert.",
+  "btn.fetch":"Daten laden / aktualisieren","btn.full":"Vollständig neu laden","btn.clear":"Lokalen Speicher leeren",
+  "data.journals.h2":"Erfasste Zeitschriften",
+  "data.journals.lead":"Quellen werden automatisch über ihre ISSN bei OpenAlex aufgelöst. Stimmt eine Zuordnung nicht, kann unten eine OpenAlex-Source-ID (z.&nbsp;B. <code class=\"mono\">S2764506816</code>) ergänzt werden.",
+  "data.overview.h2":"Publikationsvolumen pro Jahr",
+  "data.overview.lead":"Anzahl erfasster Aufsätze je Zeitschrift und Jahr — die Basislinie für alle Themenanteile.",
+  "search.ph":"Schlagwort suchen, z. B.  \"news avoidance\"  oder  trust journalism",
+  "search.f.journal":"Zeitschrift","search.f.yearfrom":"Ab Jahr","search.f.yearto":"Bis Jahr","search.f.sort":"Sortierung",
+  "search.f.alljournals":"Alle Zeitschriften",
+  "sort.relevance":"Relevanz","sort.newest":"Neueste zuerst","sort.oldest":"Älteste zuerst","sort.cited":"Meistzitiert",
+  "btn.csv":"CSV exportieren",
+  "sub.custom":"Eigene Schlagwort-Themen","sub.auto":"OpenAlex-Themen (automatisch)",
+  "topics.custom.h2":"Themenkarrieren verfolgen",
+  "topics.custom.lead":"Definiere ein Thema über Suchbegriffe (auch mehrere, durch Komma getrennt). Der Monitor zählt, in wie vielen Aufsätzen pro Jahr mindestens einer dieser Begriffe in Titel oder Abstract vorkommt — so wird sichtbar, wann ein Thema aufkommt, Konjunktur hat oder abklingt.",
+  "topics.themeName.label":"Themenname","topics.themeName.ph":"z. B. News Avoidance",
+  "topics.themeTerms.label":"Begriffe (Komma-getrennt, Phrasen erlaubt)",
+  "btn.addtheme":"Thema hinzufügen","topics.trend.h2":"Verlauf",
+  "seg.abs":"Absolut","seg.share":"Anteil\u00a0%",
+  "topics.auto.h2":"Automatische Themenzuordnung",
+  "topics.auto.lead":"OpenAlex ordnet jedem Aufsatz inhaltliche Topics zu. Wähle bis zu acht aus, um ihre Entwicklung über die Jahre nebeneinander zu sehen.",
+  "drill.close":"schließen ✕",
+  "net.h2":"Zitationsnetzwerk",
+  "net.lead":"Jeder Punkt ist ein Aufsatz, jede Linie bedeutet „zitiert“. Gezählt werden nur Zitationen <b>zwischen den ausgewählten Zeitschriften</b>. Je öfter eine Arbeit aus dem Korpus heraus zitiert wird, desto größer der Punkt — so treten die zentralen Aufsätze hervor. Farben markieren über wechselseitige Zitationen verbundene Gruppen (Forschungsstränge), benannt nach ihrem häufigsten OpenAlex-Thema.",
+  "net.q.label":"Schlagwort (optional, grenzt den Korpus ein)",
+  "net.min.label":"Min. Zitationen im Korpus","net.max.label":"Max. Knoten","net.color.label":"Färben nach",
+  "net.color.cluster":"Cluster","net.color.journal":"Zeitschrift","btn.net":"Netzwerk aufbauen",
+  "net.zoomin.title":"Vergrößern","net.zoomout.title":"Verkleinern","net.reset.title":"Ansicht zurücksetzen","btn.reset":"Reset",
+  "net.hint":"Ziehen zum Verschieben · Mausrad zum Zoomen · Klick auf einen Punkt zeigt Details",
+  "net.central.h3":"Zentrale Aufsätze",
+  "net.central.lead":"Sortiert nach Zitationen innerhalb des Korpus. Klick öffnet den Aufsatz im Graphen.",
+  "footer":"Daten: <a href=\"https://openalex.org\" target=\"_blank\" rel=\"noopener\">OpenAlex</a> (CC0). Diese Seite läuft vollständig im Browser; alle Aufsätze werden lokal gespeichert (<code>IndexedDB</code>) und beim Aktualisieren inkrementell ergänzt. Abstracts stammen aus dem OpenAlex-Index und sind je nach Verlag nicht für jeden Aufsatz vorhanden.",
+  "mem.warning":"Hinweis: Lokaler Dauerspeicher (IndexedDB) ist hier nicht verfügbar — Daten bleiben nur für diese Sitzung erhalten. Tipp: Datei über einen lokalen Server öffnen.",
+  "fetch.nokey":"Hinweis: Ohne API-Key erlaubt OpenAlex nur ~100 Credits/Tag (Test). Für den vollen Abruf bitte oben einen kostenlosen Key eintragen (openalex.org/settings/api).",
+  "prog.resolving":"Quellen werden aufgelöst …","prog.starting":"Abruf von OpenAlex startet …",
+  "prog.loaded":"{g} Aufsätze geladen …","prog.loadedTotal":"{g} / {t} Aufsätze geladen …",
+  "prog.fresh":"Neu hinzugefügte Zeitschrift(en) werden vollständig geladen …",
+  "prog.doneFull":"Fertig — {got} Aufsätze verarbeitet.","prog.doneInc":"Fertig — {got} neue/aktualisierte Aufsätze verarbeitet.",
+  "fetch.ok":"Aktualisiert: {got} Aufsätze geladen. Aktiver Bestand: {n} Aufsätze.",
+  "fetch.none":"Keine neuen Aufsätze gefunden — alles aktuell.",
+  "fetch.fail":"Abruf fehlgeschlagen: {msg}",
+  "fetch.noactive":"Keine aktive Zeitschrift mit gültiger Quelle. Bitte im Tab Daten Zeitschriften aktivieren oder auflösen.",
+  "clear.confirm":"Alle lokal gespeicherten Aufsätze löschen?","clear.ok":"Lokaler Speicher geleert.",
+  "resolve.resolving":"Quellen werden aufgelöst …","resolve.ok":"Quellen aktualisiert.","resolve.err":"Fehler: {msg}",
+  "src.th.active":"aktiv","src.th.journal":"Zeitschrift","src.th.source":"OpenAlex-Quelle","src.th.tracked":"erfasst","src.th.sourceid":"Source-ID",
+  "src.notresolved":"nicht aufgelöst","src.custom":"eigene","src.remove":"entfernen",
+  "src.removeConfirm":"„{name}“ aus der Liste entfernen?\n(Bereits geladene Aufsätze bleiben im Speicher, werden aber ausgeblendet.)",
+  "src.resolveBtn":"Quellen neu auflösen",
+  "src.search.label":"Weitere Zeitschrift suchen (Name oder ISSN)",
+  "src.search.ph":"z. B.  Communication Research  oder  1940-1612","src.search.btn":"Suchen",
+  "jsearch.searching":"Suche bei OpenAlex …","jsearch.none":"Keine Zeitschrift gefunden. Anderen Namen oder die ISSN versuchen.",
+  "jsearch.works":"{n} Werke","jsearch.add":"Hinzufügen","jsearch.inlist":"in Liste",
+  "jsearch.added":"„{name}“ hinzugefügt. Klick „Daten laden / aktualisieren“, um ihre Aufsätze zu holen.",
+  "jsearch.fail":"Suche fehlgeschlagen: {msg}",
+  "theme.needinput":"Bitte Name und mindestens einen Begriff angeben.","theme.added":"Thema „{name}“ hinzugefügt.",
+  "theme.none":"Noch kein Thema definiert.","theme.articles":"Artikel","theme.del":"Thema löschen?",
+  "drill.themeTitle":"„{name}“ — {n} Aufsätze",
+  "search.articlesWord":"Aufsätze","search.hint.matches":"Treffer hervorgehoben",
+  "search.empty.nodata.title":"Noch kein Datenbestand",
+  "search.empty.nodata.body":"Wechsle zum Tab <b>Daten</b> und lade die ausgewählten Zeitschriften von OpenAlex.",
+  "search.empty.disabled.title":"Alle Zeitschriften abgewählt",
+  "search.empty.disabled.body":"Aktiviere im Tab <b>Daten</b> mindestens eine Zeitschrift.",
+  "search.empty.nomatch.title":"Keine Treffer",
+  "search.empty.nomatch.body":"Andere Schlagworte versuchen oder Filter zurücksetzen.",
+  "search.more":"Weitere {n} anzeigen ({rest} übrig)",
+  "art.cited":"{n}× zitiert","art.oa":"Open Access","art.noabstract":"Kein Abstract im OpenAlex-Index.",
+  "art.more":"mehr ▾","art.less":"weniger ▴","art.noyear":"o. J.",
+  "topics.auto.hint":"{n} Topics · Top 40 gelistet","topics.auto.nodata":"Keine Daten","topics.auto.loadfirst":"Noch keine Daten — bitte erst laden.",
+  "topics.th.topic":"Topic","topics.th.trend":"Verlauf","topics.th.total":"gesamt","topics.th.trendcol":"Trend",
+  "drill.topicTitle":"Topic „{name}“ — {n} Aufsätze",
+  "net.stats":"{nodes} Knoten · {edges} Zitationskanten · {groups} Gruppen",
+  "net.nodata":"Noch keine Daten — bitte im Tab Daten laden.",
+  "net.norefs":"Für das Netzwerk fehlen die Zitationsbeziehungen. Bitte im Tab Daten einmal „Vollständig neu laden“ — danach sind die Verknüpfungen erfasst.",
+  "net.toofew":"Zu wenige verknüpfte Aufsätze bei dieser Schwelle. Senke „Min. Zitationen im Korpus“ oder lade mehr Jahre.",
+  "net.group":"Gruppe {n}","net.central.cited":"{n}× zitiert (Korpus)","net.central.rank":"#{i} · ",
+  "net.detail.back":"← zurück zur Liste","net.detail.incorpus":"{n}× im Korpus","net.detail.total":"{n}× gesamt",
+  "net.detail.citedby":"Wird zitiert von {n} im Korpus","net.detail.cites":"Zitiert {n} im Korpus",
+  "net.node.title":"{n}× im Korpus zitiert","chart.nothing":"Nichts ausgewählt.",
+  "err.nokey":" — API-Key fehlt oder ist ungültig. Kostenlosen Key auf openalex.org/settings/api anlegen und oben eintragen.",
+  "csv.noresults":"Keine Ergebnisse zum Export."
+ }
+};
+function t(k, vars){
+  let s = (I18N[LANG] && I18N[LANG][k]!=null) ? I18N[LANG][k] : (I18N.en[k]!=null ? I18N.en[k] : k);
+  if(vars) for(const p in vars) s = s.replace(new RegExp("\\{"+p+"\\}","g"), vars[p]);
+  return s;
+}
+function applyStaticI18n(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{ el.textContent = t(el.getAttribute("data-i18n")); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{ el.innerHTML = t(el.getAttribute("data-i18n-html")); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ el.setAttribute("placeholder", t(el.getAttribute("data-i18n-ph"))); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el=>{ el.setAttribute("title", t(el.getAttribute("data-i18n-title"))); });
+  document.documentElement.lang = LANG;
+  document.title = t("page.title");
+}
+async function setLang(lang){
+  LANG = lang; LOCALE = (lang==="de") ? LOCALE : "en-US";
+  try{ await store.setMeta("lang", lang); }catch(e){}
+  const tg=document.getElementById("langToggle"); if(tg) tg.textContent = (lang==="de") ? "EN" : "DE";
+  applyStaticI18n();
+  refreshDynamic();
+}
+function refreshDynamic(){
+  fillSelectors(); renderStatus(); renderJournalsRow(); renderSourcesTable();
+  renderOverview(); runSearch();
+}
+const API = "https://api.openalex.org";
+const SELECT = ["id","title","display_name","publication_date","publication_year","authorships",
+  "primary_location","doi","abstract_inverted_index","topics","primary_topic","keywords",
+  "cited_by_count","type","open_access","referenced_works"].join(",");
+const PALETTE = ["#1F5C8C","#C0392B","#3F7E6E","#B07A1E","#5E5AA8","#8C5A3C","#4A6572","#A8447A","#6B8E23","#2C7DA0"];
+
+/* ============================================================
+   IndexedDB-Schicht (works, meta, themes)
+   ============================================================ */
+const DB = (()=>{
+  let dbp = null;
+  function open(){
+    if(dbp) return dbp;
+    dbp = new Promise((res,rej)=>{
+      if(!("indexedDB" in window)){ rej(new Error("no-idb")); return; }
+      const r = indexedDB.open("journal-monitor", 1);
+      r.onupgradeneeded = e=>{
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains("works")) db.createObjectStore("works",{keyPath:"id"});
+        if(!db.objectStoreNames.contains("meta"))  db.createObjectStore("meta",{keyPath:"k"});
+        if(!db.objectStoreNames.contains("themes"))db.createObjectStore("themes",{keyPath:"id"});
+      };
+      r.onsuccess = ()=>res(r.result);
+      r.onerror   = ()=>rej(r.error);
+    });
+    return dbp;
+  }
+  async function tx(store,mode){ const db=await open(); return db.transaction(store,mode).objectStore(store); }
+  return {
+    available: ()=> "indexedDB" in window,
+    async putWorks(arr){
+      const db = await open();
+      await new Promise((res,rej)=>{
+        const t = db.transaction("works","readwrite");
+        t.oncomplete=res; t.onerror=()=>rej(t.error);
+        const s=t.objectStore("works"); arr.forEach(w=>s.put(w));
+      });
+    },
+    async allWorks(){ const s=await tx("works","readonly");
+      return new Promise((res,rej)=>{const r=s.getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}); },
+    async countWorks(){ const s=await tx("works","readonly");
+      return new Promise((res,rej)=>{const r=s.count();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}); },
+    async clearWorks(){ const db=await open(); return new Promise((res,rej)=>{
+      const t=db.transaction("works","readwrite");t.oncomplete=res;t.onerror=()=>rej(t.error);
+      t.objectStore("works").clear();}); },
+    async getMeta(k){ const s=await tx("meta","readonly");
+      return new Promise((res)=>{const r=s.get(k);r.onsuccess=()=>res(r.result?r.result.v:undefined);r.onerror=()=>res(undefined);}); },
+    async setMeta(k,v){ const s=await tx("meta","readwrite"); s.put({k,v}); },
+    async allThemes(){ const s=await tx("themes","readonly");
+      return new Promise((res)=>{const r=s.getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}); },
+    async putTheme(t){ const s=await tx("themes","readwrite"); s.put(t); },
+    async delTheme(id){ const s=await tx("themes","readwrite"); s.delete(id); },
+  };
+})();
+
+/* In-Memory Fallback, falls IndexedDB nicht verfügbar (z. B. manche file://-Setups) */
+const MEM = { works:new Map(), meta:new Map(), themes:new Map() };
+const usingMem = !DB.available();
+const store = usingMem ? {
+  available:()=>false,
+  putWorks:async a=>a.forEach(w=>MEM.works.set(w.id,w)),
+  allWorks:async()=>[...MEM.works.values()],
+  countWorks:async()=>MEM.works.size,
+  clearWorks:async()=>MEM.works.clear(),
+  getMeta:async k=>MEM.meta.get(k),
+  setMeta:async(k,v)=>MEM.meta.set(k,v),
+  allThemes:async()=>[...MEM.themes.values()],
+  putTheme:async t=>MEM.themes.set(t.id,t),
+  delTheme:async id=>MEM.themes.delete(id),
+} : DB;
+
+/* ============================================================
+   OpenAlex-Client
+   ============================================================ */
+function authParam(){ const k=(document.getElementById("apikey").value||"").trim();
+  return k?("&api_key="+encodeURIComponent(k)):""; }
+
+async function fetchJSON(url){
+  const r = await fetch(url);
+  if(!r.ok){
+    let extra="";
+    if(r.status===401||r.status===403) extra=t("err.nokey");
+    else if(r.status===429||r.status===409) extra=" — Tageslimit erreicht. Mit kostenlosem API-Key sind es 100.000 Credits/Tag.";
+    throw new Error("OpenAlex "+r.status+(extra||(" – "+r.statusText)));
+  }
+  return r.json();
+}
+
+/* Quellen über ISSN/Name auflösen und in die JOURNALS-Objekte schreiben */
+async function resolveSources(force){
+  for(const j of JOURNALS){
+    if(j.sourceId && !force) continue;
+    let hit=null;
+    for(const issn of (j.issns||[])){
+      try{
+        const s = await fetchJSON(`${API}/sources/issn:${issn}?select=id,display_name,works_count${authParam()}`);
+        if(s && s.id){ hit={id:short(s.id), name:s.display_name, works:s.works_count, via:"ISSN "+issn}; break; }
+      }catch(e){ /* nächste ISSN */ }
+    }
+    if(!hit && j.name){ // Such-Fallback
+      try{
+        const r = await fetchJSON(`${API}/sources?search=${encodeURIComponent(j.name)}&per-page=1&select=id,display_name,works_count${authParam()}`);
+        if(r.results && r.results[0]) hit={id:short(r.results[0].id), name:r.results[0].display_name, works:r.results[0].works_count, via:"Suche"};
+      }catch(e){}
+    }
+    if(hit){ j.sourceId=hit.id; j.sourceName=hit.name; j.works=hit.works; j.via=hit.via; }
+  }
+  await saveJournals();
+  return JOURNALS;
+}
+function short(id){ return id ? id.replace("https://openalex.org/","") : id; }
+
+/* Abstract aus invertiertem Index rekonstruieren */
+function rebuildAbstract(inv){
+  if(!inv) return "";
+  let max=0; const pos=[];
+  for(const w in inv){ for(const p of inv[w]){ pos.push([p,w]); if(p>max)max=p; } }
+  const arr = new Array(max+1).fill("");
+  for(const [p,w] of pos) arr[p]=w;
+  return arr.join(" ").replace(/\s+/g," ").trim();
+}
+
+/* Ein Work auf das schlanke lokale Format reduzieren */
+function slim(w, sourceNameById){
+  const srcId = w.primary_location && w.primary_location.source ? short(w.primary_location.source.id) : null;
+  const authors = (w.authorships||[]).map(a=>a.author?a.author.display_name:"").filter(Boolean);
+  const topics = (w.topics||[]).map(t=>({id:short(t.id), name:t.display_name}));
+  const prim = w.primary_topic ? {id:short(w.primary_topic.id), name:w.primary_topic.display_name} : null;
+  const kws = (w.keywords||[]).map(k=>k.display_name);
+  const abstract = rebuildAbstract(w.abstract_inverted_index);
+  return {
+    id: short(w.id),
+    title: w.title || w.display_name || "(ohne Titel)",
+    year: w.publication_year || null,
+    date: w.publication_date || null,
+    authors,
+    sourceId: srcId,
+    journal: sourceNameById[srcId] || (w.primary_location&&w.primary_location.source?w.primary_location.source.display_name:"") || "",
+    doi: w.doi || null,
+    abstract,
+    topics, primaryTopic: prim, keywords: kws,
+    cited: w.cited_by_count||0,
+    type: w.type||"",
+    oa: w.open_access ? !!w.open_access.is_oa : false,
+    refs: (w.referenced_works||[]).map(short),
+    blob: (w.title+" "+abstract+" "+authors.join(" ")+" "+topics.map(t=>t.name).join(" ")+" "+kws.join(" ")).toLowerCase()
+  };
+}
+
+/* Abruf für eine bestimmte Quellenmenge (optional nur kürzlich Geänderte) */
+async function fetchWorksFor(ids, fromUpdated, prog){
+  if(!ids.length) return {got:0, total:0};
+  const nameById = {}; for(const j of JOURNALS){ if(j.sourceId) nameById[j.sourceId]=j.sourceName||j.name; }
+  const yearsBack = Math.max(1, parseInt(document.getElementById("yearsBack").value)||10);
+  const fromDate = isoMinusYears(yearsBack);
+
+  let filters = `primary_location.source.id:${ids.join("|")},from_publication_date:${fromDate}`;
+  if(fromUpdated){ filters += `,from_updated_date:${fromUpdated}`; }
+  const base = `${API}/works?filter=${encodeURIComponent(filters)}&per-page=200&select=${SELECT}${authParam()}`;
+
+  let total=0;
+  try{ const head = await fetchJSON(base+"&cursor=*&per-page=1"); total = head.meta?head.meta.count:0; }catch(e){}
+
+  let cursor="*", got=0;
+  while(cursor){
+    const data = await fetchJSON(base + "&cursor=" + encodeURIComponent(cursor));
+    const results = data.results||[];
+    if(!results.length) break;
+    await store.putWorks(results.map(w=>slim(w,nameById)));
+    got += results.length;
+    cursor = data.meta ? data.meta.next_cursor : null;
+    if(prog) prog(got,total);
+    await sleep(110); // höflich gegenüber der API
+    if(got > 80000) break; // Sicherheitslimit
+  }
+  return {got, total};
+}
+
+function isoMinusYears(y){ const d=new Date(); d.setFullYear(d.getFullYear()-y); return d.toISOString().slice(0,10); }
+const sleep = ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ============================================================
+   Zustand + Aggregation im Speicher
+   ============================================================ */
+const STATE = { works:[], cWorks:[], byYear:{}, themes:[], mode:"abs", autoMode:"abs", autoSelected:new Set(), sources:{} };
+
+/* ---- Journal-Registry (dynamisch, im Speicher persistiert) ---- */
+function mkJournal(j){ return {key:j.key, name:j.name, issns:j.issns.slice(),
+  enabled:true, custom:false, sourceId:null, sourceName:null, works:null, via:null}; }
+async function loadJournals(){
+  let stored = await store.getMeta("journals");
+  let seeded = await store.getMeta("seededDefaults") || [];
+  if(!stored || !stored.length){
+    stored = DEFAULT_JOURNALS.map(mkJournal);
+    seeded = DEFAULT_JOURNALS.map(j=>j.key);
+    await store.setMeta("journals", stored);
+    await store.setMeta("seededDefaults", seeded);
+  } else {
+    // neue Standard-Zeitschriften einmalig ergänzen (bereits entfernte nicht erneut hinzufügen)
+    const seededSet=new Set(seeded);
+    const haveKeys=new Set(stored.map(j=>j.key));
+    let changed=false;
+    for(const j of DEFAULT_JOURNALS){
+      if(!seededSet.has(j.key)){
+        if(!haveKeys.has(j.key)){ stored.push(mkJournal(j)); changed=true; }
+        seededSet.add(j.key); changed=true;
+      }
+    }
+    if(changed){
+      await store.setMeta("journals", stored);
+      await store.setMeta("seededDefaults", [...seededSet]);
+    }
+  }
+  JOURNALS = stored;
+  rebuildSources();
+}
+function rebuildSources(){
+  STATE.sources = {};
+  for(const j of JOURNALS){ if(j.sourceId) STATE.sources[j.key]={id:j.sourceId, name:j.sourceName||j.name, works:j.works, via:j.via}; }
+}
+async function saveJournals(){ await store.setMeta("journals", JOURNALS); rebuildSources(); }
+function enabledJournals(){ return JOURNALS.filter(j=>j.enabled && j.sourceId); }
+function enabledSourceIds(){ return new Set(enabledJournals().map(j=>j.sourceId)); }
+function recomputeCorpus(){
+  if(JOURNALS.length){ const en=enabledSourceIds(); STATE.cWorks = STATE.works.filter(w=>en.has(w.sourceId)); }
+  else STATE.cWorks = STATE.works.slice();
+  computeYears();
+}
+
+async function loadState(){
+  STATE.works = await store.allWorks();
+  STATE.works.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
+  STATE.themes = await store.allThemes();
+  if(!STATE.themes.length){ // Beispielthema vorbelegen
+    const seed = {id:"seed-newsavoidance", name:"News Avoidance",
+      terms:["news avoidance","news fatigue","avoiding the news","selective avoidance","news overload"],
+      color:PALETTE[1], on:true};
+    await store.putTheme(seed); STATE.themes=[seed];
+  }
+  recomputeCorpus();
+}
+function computeYears(){
+  const src = STATE.cWorks || [];
+  const ys = src.map(w=>w.year).filter(Boolean);
+  STATE.minYear = ys.length?Math.min(...ys):new Date().getFullYear()-10;
+  STATE.maxYear = ys.length?Math.max(...ys):new Date().getFullYear();
+  STATE.years = []; for(let y=STATE.minYear;y<=STATE.maxYear;y++) STATE.years.push(y);
+  STATE.byYear = {}; for(const y of STATE.years) STATE.byYear[y]=0;
+  for(const w of src) if(w.year!=null && STATE.byYear[w.year]!=null) STATE.byYear[w.year]++;
+}
+
+/* Nach jeder Änderung an der Zeitschriftenliste: abhängige Ansichten aktualisieren */
+function afterJournalsChanged(){
+  recomputeCorpus();
+  fillSelectors();
+  renderJournalsRow();
+  renderOverview();
+  renderStatus();
+  runSearch();
+}
+
+/* ============================================================
+   UI: Tabs
+   ============================================================ */
+function showTab(name){
+  for(const t of ["data","search"]){
+    document.getElementById("tab-"+t).classList.toggle("active", t===name);
+    const b=document.getElementById("tabbtn-"+t); b.setAttribute("aria-selected", t===name);
+  }
+  if(name==="data") renderOverview();
+}
+document.getElementById("tabbtn-data").onclick   = ()=>showTab("data");
+document.getElementById("tabbtn-search").onclick = ()=>showTab("search");
+
+/* ============================================================
+   UI: Statusleiste, Quellen, Journals-Chips
+   ============================================================ */
+function renderStatus(){
+  const n = (STATE.cWorks||[]).length;
+  document.getElementById("stArticles").textContent = n? n.toLocaleString(LOCALE) : "0";
+  document.getElementById("stRange").textContent = n? `${STATE.minYear}–${STATE.maxYear}` : "—";
+  store.getMeta("lastSync").then(last=>{
+    document.getElementById("stSync").textContent = last? new Date(last).toLocaleDateString(LOCALE,{day:"2-digit",month:"short"}) : "—";
+  });
+}
+function renderJournalsRow(){
+  const row = document.getElementById("journalsRow");
+  row.innerHTML = JOURNALS.map(j=>{
+    const cls = !j.enabled ? "off" : (j.sourceId? "ok":"err");
+    return `<span class="jchip ${cls}"><i></i>${esc(j.name)}</span>`;
+  }).join("");
+}
+function renderSourcesTable(){
+  const faint='style="font-size:11px;color:var(--ink-faint)"';
+  const el = document.getElementById("sourcesTable");
+  el.innerHTML = `
+    <div class="add-journal">
+      <label class="field grow" style="max-width:360px">${esc(t("src.search.label"))}
+        <input type="text" id="jSearch" placeholder="${esc(t("src.search.ph"))}" autocomplete="off">
+      </label>
+      <button class="btn sm" id="btnJSearch">${esc(t("src.search.btn"))}</button>
+    </div>
+    <div id="jSearchResults"></div>
+    <table class="toptopics" style="margin-top:14px"><thead><tr>
+      <th style="width:38px">${esc(t("src.th.active"))}</th><th>${esc(t("src.th.journal"))}</th><th>${esc(t("src.th.source"))}</th>
+      <th class="num">${esc(t("src.th.tracked"))}</th><th>${esc(t("src.th.sourceid"))}</th><th></th>
+    </tr></thead><tbody>` + JOURNALS.map(j=>{
+      const status = j.sourceId
+        ? `${esc(j.sourceName||j.name)} <span class="mono" ${faint}>· ${esc(j.via||"")}</span> <span class="mono" ${faint}>(${esc(j.sourceId)})</span>`
+        : `<span style="color:var(--danger)">${esc(t("src.notresolved"))}</span>`;
+      return `<tr>
+        <td><input type="checkbox" class="jen" data-k="${esc(j.key)}" ${j.enabled?"checked":""}></td>
+        <td><b>${esc(j.name)}</b>${j.custom?` <span class="tagcustom">${esc(t("src.custom"))}</span>`:""}
+            ${j.issns&&j.issns.length?`<div class="mono" ${faint}>ISSN ${esc(j.issns.join(" / "))}</div>`:""}</td>
+        <td>${status}</td>
+        <td class="num">${j.works!=null?j.works.toLocaleString(LOCALE):"—"}</td>
+        <td><input type="text" class="ovr" data-k="${esc(j.key)}" placeholder="S…" value="${esc(j.sourceId||"")}" style="max-width:130px"></td>
+        <td><button class="linkbtn" data-rm="${esc(j.key)}" style="color:var(--danger)">${esc(t("src.remove"))}</button></td>
+      </tr>`;
+    }).join("") + `</tbody></table>
+    <div style="margin-top:12px"><button class="btn ghost sm" id="btnResolve">${esc(t("src.resolveBtn"))}</button></div>`;
+
+  // An-/Abwählen
+  el.querySelectorAll(".jen").forEach(c=>c.onchange=async()=>{
+    const j=JOURNALS.find(x=>x.key===c.dataset.k); if(j){ j.enabled=c.checked; await saveJournals(); afterJournalsChanged(); }
+  });
+  // Entfernen
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{
+    const k=b.dataset.rm; const j=JOURNALS.find(x=>x.key===k);
+    if(!confirm(t("src.removeConfirm",{name:(j?j.name:k)}))) return;
+    JOURNALS = JOURNALS.filter(x=>x.key!==k);
+    const fs=new Set((await store.getMeta("fetchedSources"))||[]); if(j&&j.sourceId) fs.delete(j.sourceId);
+    await store.setMeta("fetchedSources",[...fs]);
+    await saveJournals(); renderSourcesTable(); afterJournalsChanged();
+  });
+  // Quellen auflösen (inkl. manueller Source-IDs)
+  document.getElementById("btnResolve").onclick = async ()=>{
+    el.querySelectorAll(".ovr").forEach(i=>{ const v=i.value.trim(); const j=JOURNALS.find(x=>x.key===i.dataset.k);
+      if(j && v && v!==j.sourceId){ j.sourceId=v; j.sourceName=null; j.works=null; j.via="manuell"; } });
+    setNotice("dataNotice", t("resolve.resolving"));
+    try{
+      for(const j of JOURNALS){ if(j.sourceId && (j.via==="manuell"||!j.sourceName)){
+        try{ const s=await fetchJSON(`${API}/sources/${j.sourceId}?select=id,display_name,works_count${authParam()}`);
+          j.sourceName=s.display_name; j.works=s.works_count; }catch(e){} } }
+      await resolveSources(false);
+      renderSourcesTable(); renderJournalsRow(); afterJournalsChanged();
+      setNotice("dataNotice", t("resolve.ok"), "ok");
+    }catch(e){ setNotice("dataNotice", t("resolve.err",{msg:e.message}), "err"); }
+  };
+  // Zeitschriften-Suche
+  document.getElementById("btnJSearch").onclick = doJournalSearch;
+  document.getElementById("jSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); doJournalSearch(); } });
+}
+
+/* Zeitschrift bei OpenAlex suchen und zur Liste hinzufügen */
+async function doJournalSearch(){
+  const box=document.getElementById("jSearchResults");
+  const q=(document.getElementById("jSearch").value||"").trim();
+  if(!q){ box.innerHTML=""; return; }
+  box.innerHTML=`<div class="lead" style="margin:10px 2px">${esc(t("jsearch.searching"))}</div>`;
+  const sel="id,display_name,works_count,issn_l,country_code,type";
+  try{
+    let results=[];
+    if(/^\d{4}-\d{3}[\dxX]$/.test(q)){
+      try{ const s=await fetchJSON(`${API}/sources/issn:${q}?select=${sel}${authParam()}`); if(s&&s.id) results=[s]; }catch(e){}
+    }
+    if(!results.length){
+      const r=await fetchJSON(`${API}/sources?search=${encodeURIComponent(q)}&filter=type:journal&per-page=8&select=${sel}${authParam()}`);
+      results=r.results||[];
+    }
+    if(!results.length){ box.innerHTML=`<div class="notice">${esc(t("jsearch.none"))}</div>`; return; }
+    box.innerHTML=`<div class="jres">`+results.map(s=>{
+      const sid=short(s.id); const exists=JOURNALS.some(j=>j.sourceId===sid);
+      return `<div class="jres-item">
+        <div><div class="jres-name">${esc(s.display_name)}</div>
+          <div class="jres-meta">${s.issn_l?("ISSN "+esc(s.issn_l)+" · "):""}${s.works_count!=null?esc(t("jsearch.works",{n:s.works_count.toLocaleString(LOCALE)})):""}${s.country_code?(" · "+esc(s.country_code)):""} <span class="mono" style="color:var(--ink-faint)">(${esc(sid)})</span></div></div>
+        <button class="btn sm ${exists?"subtle":""}" data-add="${esc(sid)}" data-name="${esc(s.display_name).replace(/"/g,"&quot;")}" data-issn="${esc(s.issn_l||"")}" data-works="${s.works_count!=null?s.works_count:""}" ${exists?"disabled":""}>${exists?esc(t("jsearch.inlist")):esc(t("jsearch.add"))}</button>
+      </div>`;
+    }).join("")+`</div>`;
+    box.querySelectorAll("[data-add]").forEach(b=>b.onclick=async()=>{
+      const sid=b.dataset.add; if(JOURNALS.some(j=>j.sourceId===sid)) return;
+      JOURNALS.push({key:"src-"+sid, name:b.dataset.name, issns:b.dataset.issn?[b.dataset.issn]:[],
+        enabled:true, custom:true, sourceId:sid, sourceName:b.dataset.name,
+        works:b.dataset.works!==""?parseInt(b.dataset.works):null, via:"Suche"});
+      await saveJournals();
+      box.innerHTML=""; document.getElementById("jSearch").value="";
+      renderSourcesTable(); afterJournalsChanged();
+      setNotice("dataNotice", t("jsearch.added",{name:b.dataset.name}), "ok");
+    });
+  }catch(e){ box.innerHTML=`<div class="notice err">${esc(t("jsearch.fail",{msg:e.message}))}</div>`; }
+}
+
+/* ============================================================
+   Datenabruf-Buttons
+   ============================================================ */
+let busy=false;
+async function runFetch(full){
+  if(busy) return; busy=true;
+  const btn=document.getElementById("btnFetch"); btn.disabled=true;
+  document.getElementById("progWrap").classList.add("show");
+  if(!authParam()){
+    setNotice("dataNotice", t("fetch.nokey"));
+  }
+  setProgress(2, t("prog.resolving"));
+  try{
+    if(full || JOURNALS.some(j=>j.enabled && !j.sourceId)) await resolveSources(false);
+    renderJournalsRow(); renderSourcesTable();
+
+    const ids = enabledJournals().map(j=>j.sourceId);
+    if(!ids.length) throw new Error(t("fetch.noactive"));
+
+    if(full){ await store.clearWorks(); await store.setMeta("fetchedSources", []); }
+    const fetched = new Set((await store.getMeta("fetchedSources"))||[]);
+    const lastSync = await store.getMeta("lastSync");
+    const already = ids.filter(id=>fetched.has(id));
+    const fresh   = ids.filter(id=>!fetched.has(id));
+
+    const prog=(g,tot)=>setProgress(tot?Math.min(99, g/tot*100):50, tot? t("prog.loadedTotal",{g:g,t:tot}) : t("prog.loaded",{g:g}));
+    setProgress(5, t("prog.starting"));
+    let got=0;
+    if(full){
+      got += (await fetchWorksFor(ids, null, prog)).got;
+    } else {
+      if(already.length){
+        const fu = lastSync ? lastSync.slice(0,10) : null;  // ohne lastSync: voll
+        got += (await fetchWorksFor(already, fu, prog)).got;
+      }
+      if(fresh.length){
+        setProgress(40, t("prog.fresh"));
+        got += (await fetchWorksFor(fresh, null, prog)).got;
+      }
+    }
+    await store.setMeta("fetchedSources", [...new Set([...fetched, ...ids])]);
+    await store.setMeta("lastSync", new Date().toISOString());
+
+    await loadState();
+    fillSelectors();
+    renderStatus(); renderOverview();
+    setProgress(100, full? t("prog.doneFull",{got:got}) : t("prog.doneInc",{got:got}));
+    setNotice("dataNotice", got? t("fetch.ok",{got:got, n:STATE.cWorks.length}) : t("fetch.none"), "ok");
+    runSearch();
+  }catch(e){
+    setProgress(0,"");
+    setNotice("dataNotice", t("fetch.fail",{msg:e.message}), "err");
+  }finally{
+    btn.disabled=false; busy=false;
+    setTimeout(()=>document.getElementById("progWrap").classList.remove("show"), 2500);
+  }
+}
+document.getElementById("btnFetch").onclick=()=>runFetch(false);
+document.getElementById("btnFull").onclick =()=>runFetch(true);
+document.getElementById("btnClear").onclick=async()=>{
+  if(!confirm(t("clear.confirm"))) return;
+  await store.clearWorks(); await store.setMeta("lastSync", null); await store.setMeta("fetchedSources", []);
+  await loadState(); fillSelectors(); renderStatus(); renderOverview(); runSearch();
+  setNotice("dataNotice", t("clear.ok"), "ok");
+};
+
+function setProgress(pct,label){
+  document.getElementById("progBar").style.width = Math.max(0,Math.min(100,pct))+"%";
+  document.getElementById("progLabel").textContent = label||"";
+}
+function setNotice(id,msg,type){
+  const el=document.getElementById(id);
+  if(!msg){ el.innerHTML=""; return; }
+  el.innerHTML = `<div class="notice ${type==="err"?"err":""}">${esc(msg)}</div>`;
+}
+
+/* ============================================================
+   SUCHE
+   ============================================================ */
+function parseQuery(q){
+  q=(q||"").trim(); if(!q) return {phrases:[],words:[],terms:[]};
+  const phrases=[]; q=q.replace(/"([^"]+)"/g,(m,p)=>{phrases.push(p.toLowerCase().trim());return " ";});
+  const words=q.split(/\s+/).map(s=>s.toLowerCase()).filter(Boolean);
+  return {phrases, words, terms:[...phrases,...words]};
+}
+function matchWork(w, pq){
+  for(const p of pq.phrases) if(!w.blob.includes(p)) return false;
+  for(const wd of pq.words)  if(!w.blob.includes(wd)) return false;
+  return true;
+}
+function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
+function highlight(text, terms){
+  let out = esc(text||"");
+  if(!terms.length) return out;
+  const re = new RegExp("("+terms.map(escRe).join("|")+")","gi");
+  return out.replace(re, "<mark>$1</mark>");
+}
+
+function currentFilters(){
+  return {
+    q: document.getElementById("q").value,
+    journal: document.getElementById("fJournal").value,
+    yFrom: parseInt(document.getElementById("fYearFrom").value)||STATE.minYear,
+    yTo: parseInt(document.getElementById("fYearTo").value)||STATE.maxYear,
+    sort: document.getElementById("fSort").value,
+  };
+}
+function filteredWorks(){
+  const f=currentFilters(); const pq=parseQuery(f.q);
+  let res = STATE.cWorks.filter(w=>{
+    if(f.journal && w.sourceId!==f.journal) return false;
+    if(w.year!=null && (w.year<f.yFrom || w.year>f.yTo)) return false;
+    if(pq.terms.length && !matchWork(w,pq)) return false;
+    return true;
+  });
+  if(f.sort==="newest") res.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  else if(f.sort==="oldest") res.sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+  else if(f.sort==="cited") res.sort((a,b)=>b.cited-a.cited);
+  else { // relevance: Treffer in Titel höher gewichten
+    res.forEach(w=>{ let sc=0; const t=w.title.toLowerCase();
+      for(const term of pq.terms){ if(t.includes(term)) sc+=3; if(w.blob.includes(term)) sc+=1; }
+      w._score=sc + Math.min(w.cited,50)/200; });
+    res.sort((a,b)=> (b._score-a._score) || (b.date||"").localeCompare(a.date||""));
+  }
+  return {res, pq};
+}
+let searchLimit=50;
+function runSearch(){
+  const {res,pq}=filteredWorks();
+  STATE.lastResults=res;
+  document.getElementById("resultCount").innerHTML = `<b>${res.length.toLocaleString(LOCALE)}</b> ${esc(t("search.articlesWord"))}`;
+  document.getElementById("resultHint").textContent = pq.terms.length? t("search.hint.matches") : "";
+  const box=document.getElementById("results");
+  if(!STATE.works.length){
+    box.innerHTML=`<div class="empty"><div class="big">${esc(t("search.empty.nodata.title"))}</div>
+      ${t("search.empty.nodata.body")}</div>`; return;
+  }
+  if(!STATE.cWorks.length){
+    box.innerHTML=`<div class="empty"><div class="big">${esc(t("search.empty.disabled.title"))}</div>
+      ${t("search.empty.disabled.body")}</div>`; return;
+  }
+  if(!res.length){ box.innerHTML=`<div class="empty"><div class="big">${esc(t("search.empty.nomatch.title"))}</div>
+    ${t("search.empty.nomatch.body")}</div>`; return; }
+  const shown=res.slice(0,searchLimit);
+  box.innerHTML = shown.map((w,i)=>articleHTML(w,pq.terms,i)).join("")
+    + (res.length>searchLimit ? `<div style="text-align:center;padding:18px">
+        <button class="btn subtle sm" id="btnMore">${esc(t("search.more",{n:Math.min(50,res.length-searchLimit), rest:res.length-searchLimit}))}</button></div>`:"");
+  const more=document.getElementById("btnMore"); if(more) more.onclick=()=>{searchLimit+=50;runSearch();};
+}
+function articleHTML(w, terms, i){
+  const auth = w.authors.length? (w.authors.slice(0,4).join(", ")+(w.authors.length>4?" et al.":"")) : "—";
+  const doi = w.doi? `<a href="${esc(w.doi)}" target="_blank" rel="noopener">DOI</a>` : "";
+  const chips = (w.topics||[]).slice(0,4).map(tp=>`<span class="chip" onclick="quickSearch('${esc(tp.name).replace(/'/g,"&#39;")}')">${esc(tp.name)}</span>`).join("");
+  const absH = w.abstract? `<div class="abstract clamp" id="abs${i}">${highlight(w.abstract,terms)}</div>
+      <button class="toggle-abs" onclick="toggleAbs(${i})">${esc(t("art.more"))}</button>` :
+      `<div class="abstract" style="color:var(--ink-faint);font-style:italic">${esc(t("art.noabstract"))}</div>`;
+  return `<article class="article">
+    <h3>${w.doi?`<a href="${esc(w.doi)}" target="_blank" rel="noopener">`:""}${highlight(w.title,terms)}${w.doi?`</a>`:""}</h3>
+    <div class="amETA">
+      <span>${esc(auth)}</span><span class="dot">·</span>
+      <span class="jrnl">${esc(w.journal||"")}</span><span class="dot">·</span>
+      <span>${w.year||esc(t("art.noyear"))}</span><span class="dot">·</span>
+      <span class="cited">${esc(t("art.cited",{n:w.cited.toLocaleString(LOCALE)}))}</span>
+      ${w.oa?`<span class="dot">·</span><span style="color:var(--accent)">${esc(t("art.oa"))}</span>`:""}
+      ${doi?`<span class="dot">·</span>${doi}`:""}
+    </div>
+    ${absH}
+    <div class="chips">${chips}</div>
+  </article>`;
+}
+window.toggleAbs=function(i){ const el=document.getElementById("abs"+i); const btn=el.nextElementSibling;
+  const cl=el.classList.toggle("clamp"); btn.textContent = cl?t("art.more"):t("art.less"); };
+window.quickSearch=function(term){ document.getElementById("q").value='"'+term+'"';
+  showTab("search"); searchLimit=50; runSearch(); window.scrollTo({top:0,behavior:"smooth"}); };
+
+["q","fJournal","fYearFrom","fYearTo","fSort"].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener("input", debounce(()=>{searchLimit=50;runSearch();},220));
+});
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+document.getElementById("btnCsv").onclick=()=>{
+  const rows=STATE.lastResults||[];
+  if(!rows.length){ alert(t("csv.noresults")); return; }
+  const head=["title","authors","journal","year","date","doi","cited_by","type","open_access","topics","abstract"];
+  const csv=[head.join(",")].concat(rows.map(w=>[
+    w.title, w.authors.join("; "), w.journal, w.year||"", w.date||"", w.doi||"", w.cited, w.type, w.oa?"yes":"no",
+    (w.topics||[]).map(t=>t.name).join("; "), w.abstract
+  ].map(csvCell).join(","))).join("\r\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="journal-monitor-export.csv"; a.click();
+};
+function csvCell(v){ v=(v==null?"":String(v)); return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+
+/* Selektoren befüllen */
+function fillSelectors(){
+  const jSel=document.getElementById("fJournal");
+  jSel.innerHTML = `<option value="">${esc(t("search.f.alljournals"))}</option>` +
+    enabledJournals().map(j=>`<option value="${esc(j.sourceId)}">${esc(j.name)}</option>`).join("");
+  const yf=document.getElementById("fYearFrom"), yt=document.getElementById("fYearTo");
+  const opts = STATE.years.map(y=>`<option value="${y}">${y}</option>`).join("");
+  yf.innerHTML=opts; yt.innerHTML=opts;
+  yf.value=STATE.minYear; yt.value=STATE.maxYear;
+}
+
+/* ============================================================
+   ÜBERSICHTSCHART (Daten-Tab): Volumen je Journal/Jahr
+   ============================================================ */
+function renderOverview(){
+  if(!STATE.cWorks || !STATE.cWorks.length){ document.getElementById("overviewCard").style.display="none"; return; }
+  document.getElementById("overviewCard").style.display="";
+  const en=enabledJournals();
+  const series = en.map((j,idx)=>{
+    const sid=j.sourceId;
+    const vals={}; for(const y of STATE.years) vals[y]=0;
+    for(const w of STATE.cWorks) if(w.sourceId===sid && vals[w.year]!=null) vals[w.year]++;
+    return {label:j.name, color:PALETTE[idx%PALETTE.length], vals};
+  });
+  drawLineChart("overviewChart","overviewLegend",STATE.years,series,"abs");
+}
+
+/* ============================================================
+   SVG-Charts (ohne externe Bibliothek)
+   ============================================================ */
+function drawLineChart(containerId, legendId, years, series, mode, onPointClick){
+  const cont=document.getElementById(containerId);
+  if(!series.length || !years.length){ cont.innerHTML=`<div style="padding:40px;text-align:center;color:var(--ink-faint)">${esc(t("chart.nothing"))}</div>`;
+    if(legendId)document.getElementById(legendId).innerHTML=""; return; }
+
+  const W=820,H=320, m={t:14,r:14,b:34,l:42};
+  const innerW=W-m.l-m.r, innerH=H-m.t-m.b;
+
+  // Werte ggf. als Anteil an Gesamtaufsätzen des Jahres
+  const data=series.map(s=>{
+    return {...s, points: years.map(y=>{
+      let v=s.vals[y]||0;
+      if(mode==="share"){ const tot=STATE.byYear[y]||0; v= tot? (v/tot*100):0; }
+      return {y, v};
+    })};
+  });
+  let maxV=0; data.forEach(s=>s.points.forEach(p=>{if(p.v>maxV)maxV=p.v;}));
+  maxV = niceMax(maxV);
+  const xOf=i=> m.l + (years.length===1?innerW/2:(i*innerW/(years.length-1)));
+  const yOf=v=> m.t + innerH - (maxV? v/maxV*innerH:0);
+
+  // Gitter + Achsen
+  let g="";
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const v=maxV*i/ticks; const y=yOf(v);
+    g+=`<line class="grid" x1="${m.l}" y1="${y}" x2="${W-m.r}" y2="${y}"/>`;
+    g+=`<text class="axlabel" x="${m.l-6}" y="${y+3}" text-anchor="end">${mode==="share"?v.toFixed(0)+"%":Math.round(v)}</text>`;
+  }
+  // x-Labels (nicht überfüllen)
+  const step=Math.ceil(years.length/12);
+  years.forEach((yr,i)=>{ if(i%step===0||i===years.length-1){
+    g+=`<text class="axlabel" x="${xOf(i)}" y="${H-12}" text-anchor="middle">${String(yr).slice(2)}</text>`; }});
+  g+=`<line class="axis" x1="${m.l}" y1="${m.t+innerH}" x2="${W-m.r}" y2="${m.t+innerH}"/>`;
+
+  // Serienlinien + Punkte
+  let lines="";
+  data.forEach(s=>{
+    const pts=s.points.map((p,i)=>xOf(i)+","+yOf(p.v)).join(" ");
+    lines+=`<polyline class="series" points="${pts}" stroke="${s.color}"/>`;
+    s.points.forEach((p,i)=>{
+      const title=`${s.label} · ${p.y}: ${mode==="share"?p.v.toFixed(1)+"%":Math.round(p.v)}`;
+      lines+=`<circle class="pt" cx="${xOf(i)}" cy="${yOf(p.v)}" r="3.2" fill="${s.color}"
+        data-label="${esc(s.label).replace(/"/g,'&quot;')}" style="cursor:${onPointClick?"pointer":"default"}"><title>${esc(title)}</title></circle>`;
+    });
+  });
+
+  cont.innerHTML=`<svg class="linechart" viewBox="0 0 ${W} ${H}" role="img">${g}${lines}</svg>`;
+  if(onPointClick){ cont.querySelectorAll(".pt").forEach(c=>c.onclick=()=>onPointClick(c.dataset.label)); }
+
+  if(legendId){
+    document.getElementById(legendId).innerHTML = data.map(s=>{
+      const tot=Object.values(s.vals).reduce((a,b)=>a+(b||0),0);
+      return `<span class="legitem"><i style="background:${s.color}"></i>${esc(s.label)} <span class="ct">${tot}</span></span>`;
+    }).join("");
+  }
+}
+function niceMax(v){ if(v<=0)return 1; const p=Math.pow(10,Math.floor(Math.log10(v)));
+  const n=v/p; let f; if(n<=1)f=1;else if(n<=2)f=2;else if(n<=5)f=5;else f=10; return f*p; }
+
+/* ============================================================
+   Helfer
+   ============================================================ */
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ============================================================
+   Init
+   ============================================================ */
+(async function init(){
+  LANG = (await store.getMeta("lang")) || "en";
+  LOCALE = (LANG==="de") ? "de-DE" : "en-US";
+  const tg=document.getElementById("langToggle");
+  tg.textContent = (LANG==="de") ? "EN" : "DE";
+  tg.onclick = ()=> setLang(LANG==="en" ? "de" : "en");
+  applyStaticI18n();
+
+  if(usingMem){
+    setNotice("dataNotice", t("mem.warning"), "err");
+  }
+  await loadJournals();
+  const savedKey = await store.getMeta("apikey");
+  if(savedKey) document.getElementById("apikey").value = savedKey;
+  document.getElementById("apikey").addEventListener("change", e=> store.setMeta("apikey", e.target.value.trim()));
+  await loadState();
+  fillSelectors();
+  renderStatus();
+  renderJournalsRow();
+  renderSourcesTable();
+  renderOverview();
+  runSearch();
+})();
+</script>
+</body>
+</html>

@@ -116,7 +116,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-
 .btn:hover{background:var(--accent-deep)}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .btn.ghost{background:transparent;color:var(--accent)}
-.btn.ghost:hover{background:rgba(47,93,80,.07)}
+.btn.ghost:hover{background:rgba(31,92,140,.07)}
 .btn.subtle{background:var(--paper);color:var(--ink);border-color:var(--line)}
 .btn.subtle:hover{background:#fff;border-color:var(--ink-faint)}
 .btn.sm{padding:6px 11px;font-size:12.5px}
@@ -264,6 +264,11 @@ svg.linechart .pt:hover{r:5.5}
 
 /* ---------- Zeitschriften hinzufügen ---------- */
 .add-journal{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+.csv-import{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.csv-import .csv-title{font-size:12px;color:var(--ink-soft);font-weight:500;margin-bottom:6px}
+.csv-import .csv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.csv-import .csv-only{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-soft);cursor:pointer}
+.csv-import .csv-hint{font-size:12px;color:var(--ink-faint);margin-top:7px;line-height:1.5;max-width:72ch}
 .tagcustom{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
   border:1px solid var(--accent);border-radius:100px;padding:1px 7px;vertical-align:middle;font-family:ui-monospace,monospace}
 .jres{margin-top:10px;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
@@ -391,18 +396,35 @@ svg.linechart .pt:hover{r:5.5}
    Konfiguration: Standard-Zeitschriften (dynamisch erweiterbar)
    ============================================================ */
 const DEFAULT_JOURNALS = [
-  { key:"journalism",  name:"Journalism",                                 issns:["1464-8849","1741-3001"] },
-  { key:"jstudies",    name:"Journalism Studies",                         issns:["1461-670X","1469-9699"] },
-  { key:"jpractice",   name:"Journalism Practice",                        issns:["1751-2786","1751-2794"] },
-  { key:"jmcq",        name:"Journalism & Mass Communication Quarterly",  issns:["1077-6990","2161-430X"] },
-  { key:"digital",     name:"Digital Journalism",                         issns:["2167-0811","2167-082X"] },
-  { key:"commresearch",name:"Communication Research",                     issns:["0093-6502","1552-3810"] },
-  { key:"jcomm",       name:"Journal of Communication",                   issns:["0021-9916","1460-2466"] },
-  { key:"ijoc",        name:"International Journal of Communication",      issns:["1932-8036"] },
-  { key:"ics",         name:"Information, Communication & Society",       issns:["1369-118X","1468-4462"] },
-  { key:"smsociety",   name:"Social Media + Society",                     issns:["2056-3051"] },
-  { key:"newmedia",    name:"New Media & Society",                        issns:["1461-4448","1461-7315"] },
+  // Journalismusforschung
+  { key:"journalism",  name:"Journalism",                                   issns:["1464-8849","1741-3001"] },
+  { key:"jstudies",    name:"Journalism Studies",                           issns:["1461-670X","1469-9699"] },
+  { key:"jpractice",   name:"Journalism Practice",                          issns:["1751-2786","1751-2794"] },
+  { key:"digital",     name:"Digital Journalism",                           issns:["2167-0811","2167-082X"] },
+  { key:"jmcq",        name:"Journalism & Mass Communication Quarterly",    issns:["1077-6990","2161-430X"] },
+  { key:"ijpp",        name:"International Journal of Press/Politics",      issns:["1940-1612","1940-1620"] },
+  // Allgemeine Kommunikationswissenschaft
+  { key:"jcomm",       name:"Journal of Communication",                     issns:["0021-9916","1460-2466"] },
+  { key:"commresearch",name:"Communication Research",                       issns:["0093-6502","1552-3810"] },
+  { key:"scm",         name:"Studies in Communication and Media",           issns:["2192-4007"] },
+  { key:"mac",         name:"Media and Communication",                      issns:["2183-2439"] },
+  // Politische Kommunikation und öffentliche Meinung
+  { key:"polcomm",     name:"Political Communication",                      issns:["1058-4609","1091-7675"] },
+  { key:"ijpor",       name:"International Journal of Public Opinion Research", issns:["0954-2892","1471-6909"] },
+  { key:"poq",         name:"Public Opinion Quarterly",                     issns:["0033-362X","1537-5331"] },
+  // Digitale Medien
+  { key:"jobem",       name:"Journal of Broadcasting & Electronic Media",   issns:["0883-8151","1550-6878"] },
+  { key:"jcmc",        name:"Journal of Computer-Mediated Communication",   issns:["1083-6101"] },
+  { key:"ics",         name:"Information, Communication & Society",         issns:["1369-118X","1468-4462"] },
+  { key:"newmedia",    name:"New Media & Society",                          issns:["1461-4448","1461-7315"] },
+  { key:"smsociety",   name:"Social Media + Society",                       issns:["2056-3051"] },
+  // Medienpsychologie
+  { key:"jmp",         name:"Journal of Media Psychology",                  issns:["1864-1105","2151-2388"] },
+  { key:"mediapsych",  name:"Media Psychology",                             issns:["1521-3269","1532-785X"] },
 ];
+/* Aus der Voreinstellung genommene Zeitschriften: werden bei bestehenden Listen einmalig entfernt
+   (nur der voreingestellte Eintrag; selbst hinzugefügte Einträge bleiben unberührt). */
+const RETIRED_DEFAULTS = ["ijoc"];
 let JOURNALS = [];  // wird aus dem Speicher geladen oder aus DEFAULT_JOURNALS erstellt
 
 /* ============================================================
@@ -475,6 +497,16 @@ const I18N = {
   "src.resolveBtn":"Resolve sources again",
   "src.search.label":"Search another journal (name or ISSN)",
   "src.search.ph":"e.g.  Communication Research  or  1940-1612","src.search.btn":"Search",
+  "src.csv.title":"Load a list of journals from a CSV file",
+  "src.csv.import":"Import CSV","src.csv.export":"Export list as CSV",
+  "src.csv.only":"Activate only the journals in the file",
+  "src.csv.hint":"One journal per row. A name, an ISSN or an OpenAlex source ID each work on their own; ISSNs give the most reliable match. Comma or semicolon separated, header row optional. To get a template, export the current list.",
+  "src.csv.reading":"Reading file …","src.csv.progress":"Matching journals … {i} of {n}",
+  "src.csv.empty":"No journals found in the file. Put one journal per row (name, ISSN or OpenAlex source ID).",
+  "src.csv.done":"Imported: {added} added, {existing} already in the list.",
+  "src.csv.notfound":" Not found: {list}. Check these names or use the ISSN instead.",
+  "src.csv.toomany":"Only the first {n} rows were imported.",
+  "src.csv.fail":"Import failed: {msg}",
   "jsearch.searching":"Searching OpenAlex …","jsearch.none":"No journal found. Try another name or the ISSN.",
   "jsearch.works":"{n} works","jsearch.add":"Add","jsearch.inlist":"in list",
   "jsearch.added":"“{name}” added. Click “Load / update data” to fetch its articles.",
@@ -570,6 +602,16 @@ const I18N = {
   "src.resolveBtn":"Quellen neu auflösen",
   "src.search.label":"Weitere Zeitschrift suchen (Name oder ISSN)",
   "src.search.ph":"z. B.  Communication Research  oder  1940-1612","src.search.btn":"Suchen",
+  "src.csv.title":"Liste von Zeitschriften aus einer CSV-Datei laden",
+  "src.csv.import":"CSV importieren","src.csv.export":"Liste als CSV exportieren",
+  "src.csv.only":"Nur die Zeitschriften aus der Datei aktivieren",
+  "src.csv.hint":"Eine Zeitschrift pro Zeile. Name, ISSN oder OpenAlex-Source-ID genügen jeweils allein; ISSNs ergeben die zuverlässigste Zuordnung. Komma- oder semikolongetrennt, Kopfzeile optional. Als Vorlage einfach die aktuelle Liste exportieren.",
+  "src.csv.reading":"Datei wird gelesen …","src.csv.progress":"Zeitschriften werden zugeordnet … {i} von {n}",
+  "src.csv.empty":"Keine Zeitschriften in der Datei gefunden. Bitte eine Zeitschrift pro Zeile angeben (Name, ISSN oder OpenAlex-Source-ID).",
+  "src.csv.done":"Importiert: {added} hinzugefügt, {existing} bereits in der Liste.",
+  "src.csv.notfound":" Nicht gefunden: {list}. Diese Namen prüfen oder stattdessen die ISSN angeben.",
+  "src.csv.toomany":"Nur die ersten {n} Zeilen wurden importiert.",
+  "src.csv.fail":"Import fehlgeschlagen: {msg}",
   "jsearch.searching":"Suche bei OpenAlex …","jsearch.none":"Keine Zeitschrift gefunden. Anderen Namen oder die ISSN versuchen.",
   "jsearch.works":"{n} Werke","jsearch.add":"Hinzufügen","jsearch.inlist":"in Liste",
   "jsearch.added":"„{name}“ hinzugefügt. Klick „Daten laden / aktualisieren“, um ihre Aufsätze zu holen.",
@@ -630,7 +672,8 @@ const API = "https://api.openalex.org";
 const SELECT = ["id","title","display_name","publication_date","publication_year","authorships",
   "primary_location","doi","abstract_inverted_index","topics","keywords",
   "cited_by_count","type","open_access"].join(",");
-const PALETTE = ["#1F5C8C","#C0392B","#3F7E6E","#B07A1E","#5E5AA8","#8C5A3C","#4A6572","#A8447A","#6B8E23","#2C7DA0"];
+const PALETTE = ["#1F5C8C","#C0392B","#3F7E6E","#B07A1E","#5E5AA8","#8C5A3C","#4A6572","#A8447A","#6B8E23","#2C7DA0",
+                 "#7D3C98","#D35400","#1E8449","#5D6D7E","#922B21","#117A65","#9A7D0A","#2E4053","#AF601A","#5B2C6F"];
 
 /* ============================================================
    IndexedDB-Schicht (works, meta, themes)
@@ -828,9 +871,18 @@ async function loadJournals(){
         seededSet.add(j.key); changed=true;
       }
     }
+    // nicht mehr voreingestellte Zeitschriften einmalig entfernen
+    const retiredDone=new Set((await store.getMeta("retiredApplied"))||[]);
+    for(const key of RETIRED_DEFAULTS){
+      if(!retiredDone.has(key)){
+        stored = stored.filter(j=>!(j.key===key && !j.custom));
+        retiredDone.add(key); changed=true;
+      }
+    }
     if(changed){
       await store.setMeta("journals", stored);
       await store.setMeta("seededDefaults", [...seededSet]);
+      await store.setMeta("retiredApplied", [...retiredDone]);
     }
   }
   JOURNALS = stored;
@@ -916,6 +968,17 @@ function renderSourcesTable(){
       <button class="btn sm" id="btnJSearch">${esc(t("src.search.btn"))}</button>
     </div>
     <div id="jSearchResults"></div>
+    <div class="csv-import">
+      <div class="csv-title">${esc(t("src.csv.title"))}</div>
+      <div class="csv-row">
+        <input type="file" id="jCsvFile" accept=".csv,.txt,text/csv,text/plain" hidden>
+        <button class="btn sm" id="btnJCsv">${esc(t("src.csv.import"))}</button>
+        <label class="csv-only"><input type="checkbox" id="jCsvOnly" checked> ${esc(t("src.csv.only"))}</label>
+        <button class="btn ghost sm" id="btnJExport">${esc(t("src.csv.export"))}</button>
+      </div>
+      <p class="csv-hint">${esc(t("src.csv.hint"))}</p>
+      <div id="csvNotice"></div>
+    </div>
     <table class="toptopics" style="margin-top:14px"><thead><tr>
       <th style="width:38px">${esc(t("src.th.active"))}</th><th>${esc(t("src.th.journal"))}</th><th>${esc(t("src.th.source"))}</th>
       <th class="num">${esc(t("src.th.tracked"))}</th><th>${esc(t("src.th.sourceid"))}</th><th></th>
@@ -964,6 +1027,11 @@ function renderSourcesTable(){
   };
   // Zeitschriften-Suche
   document.getElementById("btnJSearch").onclick = doJournalSearch;
+  // Liste per CSV importieren / exportieren
+  const fileIn=document.getElementById("jCsvFile");
+  document.getElementById("btnJCsv").onclick = ()=>{ fileIn.value=""; fileIn.click(); };
+  fileIn.onchange = ()=>{ if(fileIn.files && fileIn.files[0]) importJournalCSV(fileIn.files[0], document.getElementById("jCsvOnly").checked); };
+  document.getElementById("btnJExport").onclick = exportJournalList;
   document.getElementById("jSearch").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); doJournalSearch(); } });
 }
 
@@ -1003,6 +1071,145 @@ async function doJournalSearch(){
       setNotice("dataNotice", t("jsearch.added",{name:b.dataset.name}), "ok");
     });
   }catch(e){ box.innerHTML=`<div class="notice err">${esc(t("jsearch.fail",{msg:e.message}))}</div>`; }
+}
+
+/* ============================================================
+   Zeitschriftenliste als CSV importieren / exportieren
+   ============================================================ */
+const CSV_MAX_ROWS = 300;
+const ISSN_RE = /^\d{4}-?\d{3}[\dXx]$/;
+const SID_RE  = /^(?:https?:\/\/(?:api\.)?openalex\.org\/(?:sources\/)?)?(S\d+)$/i;
+const FLAG_RE = /^(yes|no|ja|nein|true|false|x|1|0)$/i;
+const HEADER_RE = /^(name|journal|journal name|journal title|title|titel|zeitschrift|issn|issns|e-?issn|p-?issn|issn[-_ ]?l|source|source[-_ ]?id|openalex|openalex[-_ ]?(source[-_ ]?)?id|id|active|aktiv|enabled)$/i;
+
+function normIssn(x){ x=x.replace(/-/g,"").toUpperCase(); return x.slice(0,4)+"-"+x.slice(4); }
+
+/* CSV in Zeilen/Zellen zerlegen (Komma, Semikolon oder Tab; Anführungszeichen) */
+function parseCSV(text){
+  text = text.replace(/^\uFEFF/,"");
+  const first = text.split(/\r?\n/).find(l=>l.trim()) || "";
+  const cnt = ch => first.split(ch).length-1;
+  const delim = cnt("\t")>cnt(";") && cnt("\t")>cnt(",") ? "\t" : (cnt(";")>cnt(",") ? ";" : ",");
+  const rows=[]; let row=[], cell="", q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){ cell+='"'; i++; } else q=false; }
+      else cell+=c;
+    } else if(c==='"') q=true;
+    else if(c===delim){ row.push(cell); cell=""; }
+    else if(c==="\n" || c==="\r"){
+      if(c==="\r" && text[i+1]==="\n") i++;
+      row.push(cell); rows.push(row); row=[]; cell="";
+    } else cell+=c;
+  }
+  if(cell!=="" || row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r=>r.some(x=>x.trim()));
+}
+
+/* Eine Zeile deuten: ISSN(s), OpenAlex-ID, Aktiv-Markierung, sonst Name */
+function rowToEntry(cells){
+  const e={name:"", issns:[], sid:null, active:null};
+  for(let c of cells){
+    c=c.trim(); if(!c) continue;
+    const parts=c.split(/[\s\/|;,]+/).filter(Boolean);
+    if(parts.length && parts.every(p=>ISSN_RE.test(p))){ for(const p of parts) e.issns.push(normIssn(p)); continue; }
+    const m=c.match(SID_RE); if(m){ e.sid=m[1].toUpperCase(); continue; }
+    if(FLAG_RE.test(c) && e.active===null && (e.name || e.issns.length || e.sid)){ e.active=/^(yes|ja|true|x|1)$/i.test(c); continue; }
+    if(!e.name) e.name=c;
+  }
+  return (e.name || e.issns.length || e.sid) ? e : null;
+}
+
+function findJournalFor(e){
+  return JOURNALS.find(j=>
+    (e.sid && j.sourceId===e.sid) ||
+    (e.issns.length && (j.issns||[]).some(x=>e.issns.includes(x))) ||
+    (!e.sid && !e.issns.length && e.name && j.name.toLowerCase()===e.name.toLowerCase()));
+}
+
+/* Quelle bei OpenAlex finden: zuerst ID, dann ISSN, dann Name */
+async function lookupSource(e){
+  const sel="id,display_name,works_count,issn_l,issn";
+  const hard = err => /OpenAlex (401|403|409|429)/.test(err.message);   // Key-/Limitfehler nicht verschlucken
+  if(e.sid){
+    try{ const s=await fetchJSON(`${API}/sources/${e.sid}?select=${sel}${authParam()}`); if(s && s.id) return s; }
+    catch(err){ if(hard(err)) throw err; }
+  }
+  for(const issn of e.issns){
+    try{ const s=await fetchJSON(`${API}/sources/issn:${issn}?select=${sel}${authParam()}`); if(s && s.id) return s; }
+    catch(err){ if(hard(err)) throw err; }
+  }
+  if(e.name){
+    const r=await fetchJSON(`${API}/sources?search=${encodeURIComponent(e.name)}&filter=type:journal&per-page=1&select=${sel}${authParam()}`);
+    if(r.results && r.results[0]) return r.results[0];
+  }
+  return null;
+}
+
+async function readFileText(file){
+  const buf = await file.arrayBuffer();
+  const utf = new TextDecoder("utf-8").decode(buf);
+  if(!utf.includes("\uFFFD")) return utf;
+  try{ return new TextDecoder("windows-1252").decode(buf); }catch(e){ return utf; }  // ältere Excel-Exporte
+}
+
+let importing=false;
+async function importJournalCSV(file, onlyImported){
+  if(importing) return; importing=true;
+  const say=(msg,type)=>setNotice("csvNotice", msg, type);
+  try{
+    say(t("src.csv.reading"));
+    let rows = parseCSV(await readFileText(file));
+    if(rows.length && rows[0].every(c=>!c.trim() || HEADER_RE.test(c.trim()))) rows=rows.slice(1);   // Kopfzeile
+    let entries = rows.map(rowToEntry).filter(Boolean);
+    if(!entries.length){ say(t("src.csv.empty"), "err"); return; }
+    const truncated = entries.length > CSV_MAX_ROWS;
+    if(truncated) entries = entries.slice(0, CSV_MAX_ROWS);
+
+    const importedKeys=new Set(), inactiveKeys=new Set(), notFound=[];
+    let added=0;
+    for(let i=0;i<entries.length;i++){
+      const e=entries[i];
+      say(t("src.csv.progress",{i:i+1, n:entries.length}));
+      let j = findJournalFor(e);
+      if(!j){
+        const src = await lookupSource(e);
+        if(!src){ notFound.push(e.name || e.issns[0] || e.sid); continue; }
+        const sid = short(src.id);
+        j = JOURNALS.find(x=>x.sourceId===sid);
+        if(!j){
+          const issns = (src.issn && src.issn.length) ? src.issn.slice() : (src.issn_l ? [src.issn_l] : e.issns);
+          j = {key:"src-"+sid, name:src.display_name || e.name, issns, enabled:true, custom:true,
+               sourceId:sid, sourceName:src.display_name, works:src.works_count!=null?src.works_count:null, via:"CSV"};
+          JOURNALS.push(j); added++;
+        }
+        await sleep(110);
+      }
+      importedKeys.add(j.key);   // doppelte Zeilen zählen nur einmal
+      if(e.active===false) inactiveKeys.add(j.key);
+    }
+    for(const j of JOURNALS){
+      if(importedKeys.has(j.key)) j.enabled = !inactiveKeys.has(j.key);
+      else if(onlyImported) j.enabled = false;
+    }
+    await saveJournals();
+    renderSourcesTable(); afterJournalsChanged();
+    let msg = t("src.csv.done",{added, existing: importedKeys.size-added});
+    if(notFound.length) msg += t("src.csv.notfound",{list: notFound.slice(0,8).join(", ") + (notFound.length>8?" …":"")});
+    if(truncated) msg += " " + t("src.csv.toomany",{n:CSV_MAX_ROWS});
+    say(msg, notFound.length ? "err" : "ok");
+  }catch(err){
+    say(t("src.csv.fail",{msg:err.message}), "err");
+  }finally{ importing=false; }
+}
+
+function exportJournalList(){
+  const head=["name","issn","openalex_source_id","active"];
+  const lines=[head.join(",")].concat(JOURNALS.map(j=>[
+    j.name, (j.issns||[]).join(" / "), j.sourceId||"", j.enabled?"yes":"no"
+  ].map(csvCell).join(",")));
+  downloadCSV("journal-list.csv", lines.join("\r\n"));
 }
 
 /* ============================================================
@@ -1248,11 +1455,14 @@ document.getElementById("btnCsv").onclick=()=>{
     w.title, w.authors.join("; "), w.journal, w.year||"", w.date||"", w.doi||"", w.cited, w.type, w.oa?"yes":"no",
     (w.topics||[]).map(t=>t.name).join("; "), w.abstract
   ].map(csvCell).join(","))).join("\r\n");
+  downloadCSV("journal-search-export.csv", csv);
+};
+function downloadCSV(filename, csv){
   const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download="journal-search-export.csv"; a.click();
+  a.download=filename; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
-};
+}
 function csvCell(v){ v=(v==null?"":String(v)); if(/^[=+\-@]/.test(v)) v="'"+v; return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 
 /* Selektoren befüllen */

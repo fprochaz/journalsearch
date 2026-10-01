@@ -52,6 +52,9 @@ button{font-family:inherit;cursor:pointer}
 .brand-row{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .brand h1{font-size:30px;line-height:1.05}
 .brand .sub{color:var(--ink-soft);font-size:13.5px;margin-top:4px;max-width:46ch}
+.brand .credit{color:var(--ink-faint);font-size:12px;margin-top:8px}
+.brand .credit a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+.brand .credit a:hover{border-bottom-color:var(--accent)}
 .brand .eyebrow{margin-bottom:6px}
 .status-strip{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--radius);
   background:var(--paper-2);overflow:hidden}
@@ -280,6 +283,7 @@ svg.linechart .pt:hover{r:5.5}
         <div class="eyebrow" data-i18n="masthead.eyebrow">OpenAlex</div>
         <h1 data-i18n="masthead.title">Communication Studies — Journal Search</h1>
         <div class="sub" data-i18n="masthead.sub">Searchable, continuously updated archive of selected leading communication-studies journals.</div>
+        <div class="credit" data-i18n-html="masthead.credit"></div>
       </div>
       <div class="status-strip" id="statusStrip">
         <div class="stat"><div class="k" data-i18n="stat.articles">Articles</div><div class="v" id="stArticles">—</div></div>
@@ -348,6 +352,7 @@ svg.linechart .pt:hover{r:5.5}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
         <input type="text" id="q" data-i18n-ph="search.ph" placeholder='Search keyword, e.g.  "news avoidance"' autocomplete="off">
       </div>
+      <p class="eyebrow" data-i18n="search.syntax" style="margin-top:8px;text-transform:none;letter-spacing:0;font-size:12px">Space = and · comma or OR = or · minus excludes</p>
       <div class="filters">
         <label class="field"><span data-i18n="search.f.journal">Journal</span>
           <select id="fJournal"><option value="">All journals</option></select>
@@ -411,6 +416,7 @@ const I18N = {
   "masthead.eyebrow":"OpenAlex",
   "masthead.title":"Communication Studies — Journal Search",
   "masthead.sub":"Searchable, continuously updated archive of selected leading communication-studies journals — extendable with any further journals at any time. Keyword search runs across the titles and abstracts of every tracked article.",
+  "masthead.credit":"Made with Claude Opus 5.5 by <a href=\"https://www.fabian-prochazka.de/\" target=\"_blank\" rel=\"noopener\">Fabian Prochazka</a>",
   "stat.articles":"Articles","stat.range":"Period","stat.sync":"Updated",
   "tab.data":"Data","tab.search":"Search","tab.topics":"Topic monitor","tab.network":"Network",
   "data.update.h2":"Update the dataset",
@@ -421,10 +427,11 @@ const I18N = {
   "data.apikey.note":"It also works <b>without a key</b>, but OpenAlex then grants only about 100 credits per day — enough to try it out, not for a full fetch. A <i>credit</i> is a billing unit per request, not a result: one search request (up to 200 articles) costs 10 credits, so 100 credits cover roughly 2,000 articles. A free key at <a href=\"https://openalex.org/settings/api\" target=\"_blank\" rel=\"noopener\">openalex.org/settings/api</a> raises this to 100,000 credits/day (around two million articles) — ample for the full back catalogue. The key is stored locally in your browser.",
   "btn.fetch":"Load / update data","btn.full":"Full reload","btn.clear":"Clear local storage",
   "data.journals.h2":"Tracked journals",
-  "data.journals.lead":"Sources are resolved automatically via their ISSN at OpenAlex. If a match is wrong, you can add an OpenAlex source ID (e.g. <code class=\"mono\">S2764506816</code>) below.",
+  "data.journals.lead":"This preset list reflects the journals relevant to my own research — you can remove as many as you like or add any others via the search below. Your selection is saved in your browser. Sources are resolved automatically via their ISSN at OpenAlex. If a match is wrong, you can add an OpenAlex source ID (e.g. <code class=\"mono\">S2764506816</code>) below.",
   "data.overview.h2":"Publication volume per year",
   "data.overview.lead":"Number of tracked articles per journal and year — the baseline for all topic shares.",
   "search.ph":"Search keyword, e.g.  \"news avoidance\"  or  trust journalism",
+  "search.syntax":"Space = and · comma or OR = or · minus excludes — e.g. climate, environment -policy",
   "search.f.journal":"Journal","search.f.yearfrom":"From year","search.f.yearto":"To year","search.f.sort":"Sort by",
   "search.f.alljournals":"All journals",
   "sort.relevance":"Relevance","sort.newest":"Newest first","sort.oldest":"Oldest first","sort.cited":"Most cited",
@@ -449,13 +456,14 @@ const I18N = {
   "net.central.h3":"Central articles",
   "net.central.lead":"Sorted by citations within the corpus. Click opens the article in the graph.",
   "footer":"Data: <a href=\"https://openalex.org\" target=\"_blank\" rel=\"noopener\">OpenAlex</a> (CC0). This page runs entirely in your browser; all articles are stored locally (<code>IndexedDB</code>) and topped up incrementally on update. Abstracts come from the OpenAlex index and aren't available for every article depending on the publisher.",
-  "mem.warning":"Note: persistent local storage (IndexedDB) isn't available here — data is kept only for this session. Tip: open the file via a local server.",
+  "mem.warning":"Note: your browser doesn't allow permanent local storage here (e.g. in a private window) — data and settings are kept only for this session.",
+  "err.limit":" — daily limit reached. With a free API key you get 100,000 credits per day.",
   "fetch.nokey":"Note: without a key, OpenAlex allows only ~100 credits/day (testing). For the full fetch, enter a free key above (openalex.org/settings/api).",
   "prog.resolving":"Resolving sources …","prog.starting":"Fetch from OpenAlex starting …",
   "prog.loaded":"{g} articles loaded …","prog.loadedTotal":"{g} / {t} articles loaded …",
   "prog.fresh":"Loading newly added journal(s) in full …",
-  "prog.doneFull":"Done — {got} articles processed.","prog.doneInc":"Done — {got} new/updated articles processed.",
-  "fetch.ok":"Updated: {got} articles loaded. Active corpus: {n} articles.",
+  "prog.doneFull":"Done — {got} articles processed.","prog.doneInc":"Done — {got} recent articles checked.",
+  "fetch.ok":"Updated: {got} articles retrieved. Active corpus: {n} articles.",
   "fetch.none":"No new articles found — everything up to date.",
   "fetch.fail":"Fetch failed: {msg}",
   "fetch.noactive":"No active journal with a valid source. Please enable or resolve journals in the Data tab.",
@@ -503,6 +511,7 @@ const I18N = {
   "masthead.eyebrow":"OpenAlex",
   "masthead.title":"Kommunikationswissenschaft — Zeitschriften-Suche",
   "masthead.sub":"Durchsuchbares, fortlaufend aktualisiertes Archiv ausgewählter Leitzeitschriften der Kommunikationswissenschaft — jederzeit um beliebige weitere Zeitschriften erweiterbar. Die Schlagwortsuche durchsucht Titel und Abstracts aller erfassten Aufsätze.",
+  "masthead.credit":"Erstellt mit Claude Opus 5.5 von <a href=\"https://www.fabian-prochazka.de/\" target=\"_blank\" rel=\"noopener\">Fabian Prochazka</a>",
   "stat.articles":"Artikel","stat.range":"Zeitraum","stat.sync":"Stand",
   "tab.data":"Daten","tab.search":"Suche","tab.topics":"Themen-Monitor","tab.network":"Netzwerk",
   "data.update.h2":"Datenbestand aktualisieren",
@@ -513,10 +522,11 @@ const I18N = {
   "data.apikey.note":"Es funktioniert auch <b>ohne Key</b>, dann gewährt OpenAlex aber nur rund 100 Credits pro Tag — genug zum Ausprobieren, nicht für einen vollen Abruf. Ein <i>Credit</i> ist eine Abrechnungseinheit pro Anfrage, kein Treffer: Eine Suchanfrage (bis zu 200 Aufsätze) kostet 10 Credits, 100 Credits reichen also für etwa 2.000 Aufsätze. Ein kostenloser Key auf <a href=\"https://openalex.org/settings/api\" target=\"_blank\" rel=\"noopener\">openalex.org/settings/api</a> hebt das auf 100.000 Credits/Tag (rund zwei Millionen Aufsätze) — mehr als genug für den vollen Bestand. Der Key wird lokal im Browser gespeichert.",
   "btn.fetch":"Daten laden / aktualisieren","btn.full":"Vollständig neu laden","btn.clear":"Lokalen Speicher leeren",
   "data.journals.h2":"Erfasste Zeitschriften",
-  "data.journals.lead":"Quellen werden automatisch über ihre ISSN bei OpenAlex aufgelöst. Stimmt eine Zuordnung nicht, kann unten eine OpenAlex-Source-ID (z.&nbsp;B. <code class=\"mono\">S2764506816</code>) ergänzt werden.",
+  "data.journals.lead":"Diese voreingestellte Liste enthält die Zeitschriften, die für meine eigene Forschung relevant sind — du kannst beliebig viele entfernen oder über die Suche unten weitere hinzufügen. Deine Auswahl wird im Browser gespeichert. Quellen werden automatisch über ihre ISSN bei OpenAlex aufgelöst. Stimmt eine Zuordnung nicht, kann unten eine OpenAlex-Source-ID (z.&nbsp;B. <code class=\"mono\">S2764506816</code>) ergänzt werden.",
   "data.overview.h2":"Publikationsvolumen pro Jahr",
   "data.overview.lead":"Anzahl erfasster Aufsätze je Zeitschrift und Jahr — die Basislinie für alle Themenanteile.",
   "search.ph":"Schlagwort suchen, z. B.  \"news avoidance\"  oder  trust journalism",
+  "search.syntax":"Leerzeichen = und · Komma oder OR = oder · Minus schließt aus — z. B. climate, environment -policy",
   "search.f.journal":"Zeitschrift","search.f.yearfrom":"Ab Jahr","search.f.yearto":"Bis Jahr","search.f.sort":"Sortierung",
   "search.f.alljournals":"Alle Zeitschriften",
   "sort.relevance":"Relevanz","sort.newest":"Neueste zuerst","sort.oldest":"Älteste zuerst","sort.cited":"Meistzitiert",
@@ -541,13 +551,14 @@ const I18N = {
   "net.central.h3":"Zentrale Aufsätze",
   "net.central.lead":"Sortiert nach Zitationen innerhalb des Korpus. Klick öffnet den Aufsatz im Graphen.",
   "footer":"Daten: <a href=\"https://openalex.org\" target=\"_blank\" rel=\"noopener\">OpenAlex</a> (CC0). Diese Seite läuft vollständig im Browser; alle Aufsätze werden lokal gespeichert (<code>IndexedDB</code>) und beim Aktualisieren inkrementell ergänzt. Abstracts stammen aus dem OpenAlex-Index und sind je nach Verlag nicht für jeden Aufsatz vorhanden.",
-  "mem.warning":"Hinweis: Lokaler Dauerspeicher (IndexedDB) ist hier nicht verfügbar — Daten bleiben nur für diese Sitzung erhalten. Tipp: Datei über einen lokalen Server öffnen.",
+  "mem.warning":"Hinweis: Dein Browser erlaubt hier keine dauerhafte lokale Speicherung (z. B. im privaten Fenster) — Daten und Einstellungen bleiben nur für diese Sitzung erhalten.",
+  "err.limit":" — Tageslimit erreicht. Mit kostenlosem API-Key sind es 100.000 Credits pro Tag.",
   "fetch.nokey":"Hinweis: Ohne API-Key erlaubt OpenAlex nur ~100 Credits/Tag (Test). Für den vollen Abruf bitte oben einen kostenlosen Key eintragen (openalex.org/settings/api).",
   "prog.resolving":"Quellen werden aufgelöst …","prog.starting":"Abruf von OpenAlex startet …",
   "prog.loaded":"{g} Aufsätze geladen …","prog.loadedTotal":"{g} / {t} Aufsätze geladen …",
   "prog.fresh":"Neu hinzugefügte Zeitschrift(en) werden vollständig geladen …",
-  "prog.doneFull":"Fertig — {got} Aufsätze verarbeitet.","prog.doneInc":"Fertig — {got} neue/aktualisierte Aufsätze verarbeitet.",
-  "fetch.ok":"Aktualisiert: {got} Aufsätze geladen. Aktiver Bestand: {n} Aufsätze.",
+  "prog.doneFull":"Fertig — {got} Aufsätze verarbeitet.","prog.doneInc":"Fertig — {got} aktuelle Aufsätze geprüft.",
+  "fetch.ok":"Aktualisiert: {got} Aufsätze abgerufen. Aktiver Bestand: {n} Aufsätze.",
   "fetch.none":"Keine neuen Aufsätze gefunden — alles aktuell.",
   "fetch.fail":"Abruf fehlgeschlagen: {msg}",
   "fetch.noactive":"Keine aktive Zeitschrift mit gültiger Quelle. Bitte im Tab Daten Zeitschriften aktivieren oder auflösen.",
@@ -617,8 +628,8 @@ function refreshDynamic(){
 }
 const API = "https://api.openalex.org";
 const SELECT = ["id","title","display_name","publication_date","publication_year","authorships",
-  "primary_location","doi","abstract_inverted_index","topics","primary_topic","keywords",
-  "cited_by_count","type","open_access","referenced_works"].join(",");
+  "primary_location","doi","abstract_inverted_index","topics","keywords",
+  "cited_by_count","type","open_access"].join(",");
 const PALETTE = ["#1F5C8C","#C0392B","#3F7E6E","#B07A1E","#5E5AA8","#8C5A3C","#4A6572","#A8447A","#6B8E23","#2C7DA0"];
 
 /* ============================================================
@@ -645,6 +656,8 @@ const DB = (()=>{
   async function tx(store,mode){ const db=await open(); return db.transaction(store,mode).objectStore(store); }
   return {
     available: ()=> "indexedDB" in window,
+    // prüft, ob sich die Datenbank wirklich öffnen lässt (z. B. nicht in manchen privaten Fenstern)
+    probe: ()=> Promise.race([open().then(()=>true,()=>false), new Promise(r=>setTimeout(()=>r(false),4000))]),
     async putWorks(arr){
       const db = await open();
       await new Promise((res,rej)=>{
@@ -663,17 +676,12 @@ const DB = (()=>{
     async getMeta(k){ const s=await tx("meta","readonly");
       return new Promise((res)=>{const r=s.get(k);r.onsuccess=()=>res(r.result?r.result.v:undefined);r.onerror=()=>res(undefined);}); },
     async setMeta(k,v){ const s=await tx("meta","readwrite"); s.put({k,v}); },
-    async allThemes(){ const s=await tx("themes","readonly");
-      return new Promise((res)=>{const r=s.getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}); },
-    async putTheme(t){ const s=await tx("themes","readwrite"); s.put(t); },
-    async delTheme(id){ const s=await tx("themes","readwrite"); s.delete(id); },
   };
 })();
 
 /* In-Memory Fallback, falls IndexedDB nicht verfügbar (z. B. manche file://-Setups) */
-const MEM = { works:new Map(), meta:new Map(), themes:new Map() };
-const usingMem = !DB.available();
-const store = usingMem ? {
+const MEM = { works:new Map(), meta:new Map() };
+const MEMSTORE = {
   available:()=>false,
   putWorks:async a=>a.forEach(w=>MEM.works.set(w.id,w)),
   allWorks:async()=>[...MEM.works.values()],
@@ -681,10 +689,9 @@ const store = usingMem ? {
   clearWorks:async()=>MEM.works.clear(),
   getMeta:async k=>MEM.meta.get(k),
   setMeta:async(k,v)=>MEM.meta.set(k,v),
-  allThemes:async()=>[...MEM.themes.values()],
-  putTheme:async t=>MEM.themes.set(t.id,t),
-  delTheme:async id=>MEM.themes.delete(id),
-} : DB;
+};
+let usingMem = false;
+let store = DB;   // wird in init() auf MEMSTORE umgestellt, falls IndexedDB nicht nutzbar ist
 
 /* ============================================================
    OpenAlex-Client
@@ -697,7 +704,7 @@ async function fetchJSON(url){
   if(!r.ok){
     let extra="";
     if(r.status===401||r.status===403) extra=t("err.nokey");
-    else if(r.status===429||r.status===409) extra=" — Tageslimit erreicht. Mit kostenlosem API-Key sind es 100.000 Credits/Tag.";
+    else if(r.status===429||r.status===409) extra=t("err.limit");
     throw new Error("OpenAlex "+r.status+(extra||(" – "+r.statusText)));
   }
   return r.json();
@@ -716,7 +723,7 @@ async function resolveSources(force){
     }
     if(!hit && j.name){ // Such-Fallback
       try{
-        const r = await fetchJSON(`${API}/sources?search=${encodeURIComponent(j.name)}&per-page=1&select=id,display_name,works_count${authParam()}`);
+        const r = await fetchJSON(`${API}/sources?search=${encodeURIComponent(j.name)}&filter=type:journal&per-page=1&select=id,display_name,works_count${authParam()}`);
         if(r.results && r.results[0]) hit={id:short(r.results[0].id), name:r.results[0].display_name, works:r.results[0].works_count, via:"Suche"};
       }catch(e){}
     }
@@ -742,12 +749,12 @@ function slim(w, sourceNameById){
   const srcId = w.primary_location && w.primary_location.source ? short(w.primary_location.source.id) : null;
   const authors = (w.authorships||[]).map(a=>a.author?a.author.display_name:"").filter(Boolean);
   const topics = (w.topics||[]).map(t=>({id:short(t.id), name:t.display_name}));
-  const prim = w.primary_topic ? {id:short(w.primary_topic.id), name:w.primary_topic.display_name} : null;
   const kws = (w.keywords||[]).map(k=>k.display_name);
   const abstract = rebuildAbstract(w.abstract_inverted_index);
+  const title = w.title || w.display_name || "(untitled)";
   return {
     id: short(w.id),
-    title: w.title || w.display_name || "(ohne Titel)",
+    title,
     year: w.publication_year || null,
     date: w.publication_date || null,
     authors,
@@ -755,32 +762,28 @@ function slim(w, sourceNameById){
     journal: sourceNameById[srcId] || (w.primary_location&&w.primary_location.source?w.primary_location.source.display_name:"") || "",
     doi: w.doi || null,
     abstract,
-    topics, primaryTopic: prim, keywords: kws,
+    topics, keywords: kws,
     cited: w.cited_by_count||0,
     type: w.type||"",
     oa: w.open_access ? !!w.open_access.is_oa : false,
-    refs: (w.referenced_works||[]).map(short),
-    blob: (w.title+" "+abstract+" "+authors.join(" ")+" "+topics.map(t=>t.name).join(" ")+" "+kws.join(" ")).toLowerCase()
+    blob: (title+" "+abstract+" "+authors.join(" ")+" "+topics.map(t=>t.name).join(" ")+" "+kws.join(" ")).toLowerCase()
   };
 }
 
 /* Abruf für eine bestimmte Quellenmenge (optional nur kürzlich Geänderte) */
-async function fetchWorksFor(ids, fromUpdated, prog){
+/* Lädt alle Aufsätze der Quellen ab einem Publikationsdatum.
+   (Der Filter from_updated_date ist bei OpenAlex nur in kostenpflichtigen Tarifen
+   verfügbar und wird daher bewusst nicht verwendet.) */
+async function fetchWorksFor(ids, fromDate, prog){
   if(!ids.length) return {got:0, total:0};
   const nameById = {}; for(const j of JOURNALS){ if(j.sourceId) nameById[j.sourceId]=j.sourceName||j.name; }
-  const yearsBack = Math.max(1, parseInt(document.getElementById("yearsBack").value)||10);
-  const fromDate = isoMinusYears(yearsBack);
-
-  let filters = `primary_location.source.id:${ids.join("|")},from_publication_date:${fromDate}`;
-  if(fromUpdated){ filters += `,from_updated_date:${fromUpdated}`; }
+  const filters = `primary_location.source.id:${ids.join("|")},from_publication_date:${fromDate}`;
   const base = `${API}/works?filter=${encodeURIComponent(filters)}&per-page=200&select=${SELECT}${authParam()}`;
 
-  let total=0;
-  try{ const head = await fetchJSON(base+"&cursor=*&per-page=1"); total = head.meta?head.meta.count:0; }catch(e){}
-
-  let cursor="*", got=0;
+  let cursor="*", got=0, total=0;
   while(cursor){
     const data = await fetchJSON(base + "&cursor=" + encodeURIComponent(cursor));
+    if(!total && data.meta && data.meta.count) total = data.meta.count;
     const results = data.results||[];
     if(!results.length) break;
     await store.putWorks(results.map(w=>slim(w,nameById)));
@@ -794,12 +797,14 @@ async function fetchWorksFor(ids, fromUpdated, prog){
 }
 
 function isoMinusYears(y){ const d=new Date(); d.setFullYear(d.getFullYear()-y); return d.toISOString().slice(0,10); }
+function isoMinusDays(iso, days){ return new Date(new Date(iso).getTime()-days*864e5).toISOString().slice(0,10); }
+function yearsBackValue(){ return Math.max(1, Math.min(130, parseInt(document.getElementById("yearsBack").value)||10)); }
 const sleep = ms=>new Promise(r=>setTimeout(r,ms));
 
 /* ============================================================
    Zustand + Aggregation im Speicher
    ============================================================ */
-const STATE = { works:[], cWorks:[], byYear:{}, themes:[], mode:"abs", autoMode:"abs", autoSelected:new Set(), sources:{} };
+const STATE = { works:[], cWorks:[], byYear:{}, sources:{} };
 
 /* ---- Journal-Registry (dynamisch, im Speicher persistiert) ---- */
 function mkJournal(j){ return {key:j.key, name:j.name, issns:j.issns.slice(),
@@ -847,13 +852,6 @@ function recomputeCorpus(){
 async function loadState(){
   STATE.works = await store.allWorks();
   STATE.works.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
-  STATE.themes = await store.allThemes();
-  if(!STATE.themes.length){ // Beispielthema vorbelegen
-    const seed = {id:"seed-newsavoidance", name:"News Avoidance",
-      terms:["news avoidance","news fatigue","avoiding the news","selective avoidance","news overload"],
-      color:PALETTE[1], on:true};
-    await store.putTheme(seed); STATE.themes=[seed];
-  }
   recomputeCorpus();
 }
 function computeYears(){
@@ -897,7 +895,7 @@ function renderStatus(){
   document.getElementById("stArticles").textContent = n? n.toLocaleString(LOCALE) : "0";
   document.getElementById("stRange").textContent = n? `${STATE.minYear}–${STATE.maxYear}` : "—";
   store.getMeta("lastSync").then(last=>{
-    document.getElementById("stSync").textContent = last? new Date(last).toLocaleDateString(LOCALE,{day:"2-digit",month:"short"}) : "—";
+    document.getElementById("stSync").textContent = last? new Date(last).toLocaleDateString(LOCALE,{day:"2-digit",month:"short",year:"numeric"}) : "—";
   });
 }
 function renderJournalsRow(){
@@ -946,14 +944,14 @@ function renderSourcesTable(){
     const k=b.dataset.rm; const j=JOURNALS.find(x=>x.key===k);
     if(!confirm(t("src.removeConfirm",{name:(j?j.name:k)}))) return;
     JOURNALS = JOURNALS.filter(x=>x.key!==k);
-    const fs=new Set((await store.getMeta("fetchedSources"))||[]); if(j&&j.sourceId) fs.delete(j.sourceId);
-    await store.setMeta("fetchedSources",[...fs]);
+    const fm=(await getFetchedMap()); if(j&&j.sourceId) delete fm[j.sourceId];
+    await store.setMeta("fetchedFrom", fm);
     await saveJournals(); renderSourcesTable(); afterJournalsChanged();
   });
   // Quellen auflösen (inkl. manueller Source-IDs)
   document.getElementById("btnResolve").onclick = async ()=>{
-    el.querySelectorAll(".ovr").forEach(i=>{ const v=i.value.trim(); const j=JOURNALS.find(x=>x.key===i.dataset.k);
-      if(j && v && v!==j.sourceId){ j.sourceId=v; j.sourceName=null; j.works=null; j.via="manuell"; } });
+    el.querySelectorAll(".ovr").forEach(i=>{ const v=i.value.trim().replace(/.*\//,"").toUpperCase(); const j=JOURNALS.find(x=>x.key===i.dataset.k);
+      if(j && /^S\d+$/.test(v) && v!==j.sourceId){ j.sourceId=v; j.sourceName=null; j.works=null; j.via="manuell"; } });
     setNotice("dataNotice", t("resolve.resolving"));
     try{
       for(const j of JOURNALS){ if(j.sourceId && (j.via==="manuell"||!j.sourceName)){
@@ -1026,28 +1024,30 @@ async function runFetch(full){
     const ids = enabledJournals().map(j=>j.sourceId);
     if(!ids.length) throw new Error(t("fetch.noactive"));
 
-    if(full){ await store.clearWorks(); await store.setMeta("fetchedSources", []); }
-    const fetched = new Set((await store.getMeta("fetchedSources"))||[]);
+    const wantFrom = isoMinusYears(yearsBackValue());
+    if(full){ await store.clearWorks(); await store.setMeta("fetchedFrom", {}); }
+    const fm = await getFetchedMap();
     const lastSync = await store.getMeta("lastSync");
-    const already = ids.filter(id=>fetched.has(id));
-    const fresh   = ids.filter(id=>!fetched.has(id));
+    // bereits geladen = Quelle schon abgerufen UND gewünschter Zeitraum reicht nicht weiter zurück
+    const already = ids.filter(id=>fm[id] && fm[id] <= wantFrom);
+    const fresh   = ids.filter(id=>!(fm[id] && fm[id] <= wantFrom));
+    // Aktualisierung: neu erschienene Aufsätze seit dem letzten Abruf (mit 12 Monaten Puffer
+    // für nachträglich indexierte Einträge), aber nie vor dem gewünschten Zeitraum
+    let refreshFrom = lastSync ? isoMinusDays(lastSync, 365) : wantFrom;
+    if(refreshFrom < wantFrom) refreshFrom = wantFrom;
 
     const prog=(g,tot)=>setProgress(tot?Math.min(99, g/tot*100):50, tot? t("prog.loadedTotal",{g:g,t:tot}) : t("prog.loaded",{g:g}));
     setProgress(5, t("prog.starting"));
     let got=0;
-    if(full){
-      got += (await fetchWorksFor(ids, null, prog)).got;
-    } else {
-      if(already.length){
-        const fu = lastSync ? lastSync.slice(0,10) : null;  // ohne lastSync: voll
-        got += (await fetchWorksFor(already, fu, prog)).got;
-      }
-      if(fresh.length){
-        setProgress(40, t("prog.fresh"));
-        got += (await fetchWorksFor(fresh, null, prog)).got;
-      }
+    if(already.length){
+      got += (await fetchWorksFor(already, refreshFrom, prog)).got;
     }
-    await store.setMeta("fetchedSources", [...new Set([...fetched, ...ids])]);
+    if(fresh.length){
+      if(already.length) setProgress(40, t("prog.fresh"));
+      got += (await fetchWorksFor(fresh, wantFrom, prog)).got;
+      for(const id of fresh) fm[id] = (fm[id] && fm[id] < wantFrom) ? fm[id] : wantFrom;
+      await store.setMeta("fetchedFrom", fm);
+    }
     await store.setMeta("lastSync", new Date().toISOString());
 
     await loadState();
@@ -1068,11 +1068,22 @@ document.getElementById("btnFetch").onclick=()=>runFetch(false);
 document.getElementById("btnFull").onclick =()=>runFetch(true);
 document.getElementById("btnClear").onclick=async()=>{
   if(!confirm(t("clear.confirm"))) return;
-  await store.clearWorks(); await store.setMeta("lastSync", null); await store.setMeta("fetchedSources", []);
+  await store.clearWorks(); await store.setMeta("lastSync", null); await store.setMeta("fetchedFrom", {});
   await loadState(); fillSelectors(); renderStatus(); renderOverview(); runSearch();
   setNotice("dataNotice", t("clear.ok"), "ok");
 };
 
+/* Abrufstand je Quelle: {sourceId: frühestes geladenes Publikationsdatum}.
+   Übernimmt den Stand älterer Versionen (Liste "fetchedSources"). */
+async function getFetchedMap(){
+  let fm = await store.getMeta("fetchedFrom");
+  if(fm && typeof fm==="object") return fm;
+  fm = {};
+  const old = (await store.getMeta("fetchedSources"))||[];
+  const assumed = isoMinusYears(yearsBackValue());
+  for(const id of old) fm[id] = assumed;
+  return fm;
+}
 function setProgress(pct,label){
   document.getElementById("progBar").style.width = Math.max(0,Math.min(100,pct))+"%";
   document.getElementById("progLabel").textContent = label||"";
@@ -1087,22 +1098,60 @@ function setNotice(id,msg,type){
    SUCHE
    ============================================================ */
 function parseQuery(q){
-  q=(q||"").trim(); if(!q) return {phrases:[],words:[],terms:[]};
-  const phrases=[]; q=q.replace(/"([^"]+)"/g,(m,p)=>{phrases.push(p.toLowerCase().trim());return " ";});
-  const words=q.split(/\s+/).map(s=>s.toLowerCase()).filter(Boolean);
-  return {phrases, words, terms:[...phrases,...words]};
+  q=(q||"").trim(); if(!q) return {groups:[], terms:[]};
+  // Tokenisieren (quote-bewusst): Komma und das Wort OR trennen ODER-Gruppen,
+  // führendes Minus bedeutet Ausschluss, "..." ist eine exakte Phrase.
+  const toks=[]; let i=0;
+  while(i<q.length){
+    const c=q[i];
+    if(c===","){ toks.push({sep:true}); i++; continue; }
+    if(/\s/.test(c)){ i++; continue; }
+    let neg=false;
+    if(c==="-"){ neg=true; i++; }
+    if(q[i]==='"'){
+      const end=q.indexOf('"', i+1);
+      const phrase = end===-1 ? q.slice(i+1) : q.slice(i+1,end);
+      i = end===-1 ? q.length : end+1;
+      const val=phrase.toLowerCase().trim();
+      if(val) toks.push({neg, val});
+    } else {
+      let j=i; while(j<q.length && !/[\s,]/.test(q[j])) j++;
+      const val=q.slice(i,j).toLowerCase(); i=j;
+      if(val==="or" && !neg) toks.push({sep:true});
+      else if(val) toks.push({neg, val});
+    }
+  }
+  const groups=[]; let cur={inc:[],exc:[]}, has=false;
+  for(const tk of toks){
+    if(tk.sep){ if(has) groups.push(cur); cur={inc:[],exc:[]}; has=false; continue; }
+    has=true; (tk.neg?cur.exc:cur.inc).push(tk.val);
+  }
+  if(has) groups.push(cur);
+  const terms=[]; for(const g of groups) for(const term of g.inc) terms.push(term);
+  return {groups, terms};
 }
 function matchWork(w, pq){
-  for(const p of pq.phrases) if(!w.blob.includes(p)) return false;
-  for(const wd of pq.words)  if(!w.blob.includes(wd)) return false;
-  return true;
+  if(!pq.groups.length) return true;
+  for(const g of pq.groups){           // ODER zwischen den Gruppen
+    let ok=true;
+    for(const inc of g.inc) if(!w.blob.includes(inc)){ ok=false; break; }   // UND innerhalb
+    if(ok) for(const exc of g.exc) if(w.blob.includes(exc)){ ok=false; break; } // Ausschluss
+    if(ok) return true;
+  }
+  return false;
 }
 function escRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); }
 function highlight(text, terms){
-  let out = esc(text||"");
-  if(!terms.length) return out;
-  const re = new RegExp("("+terms.map(escRe).join("|")+")","gi");
-  return out.replace(re, "<mark>$1</mark>");
+  text = text||"";
+  if(!terms.length) return esc(text);
+  const re = new RegExp([...terms].sort((a,b)=>b.length-a.length).map(escRe).join("|"),"gi");
+  let out="", last=0, m;
+  while((m=re.exec(text))){
+    if(!m[0].length){ re.lastIndex++; continue; }
+    out += esc(text.slice(last,m.index)) + "<mark>"+esc(m[0])+"</mark>";
+    last = m.index + m[0].length;
+  }
+  return out + esc(text.slice(last));
 }
 
 function currentFilters(){
@@ -1119,7 +1168,7 @@ function filteredWorks(){
   let res = STATE.cWorks.filter(w=>{
     if(f.journal && w.sourceId!==f.journal) return false;
     if(w.year!=null && (w.year<f.yFrom || w.year>f.yTo)) return false;
-    if(pq.terms.length && !matchWork(w,pq)) return false;
+    if(pq.groups.length && !matchWork(w,pq)) return false;
     return true;
   });
   if(f.sort==="newest") res.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
@@ -1159,7 +1208,7 @@ function runSearch(){
 function articleHTML(w, terms, i){
   const auth = w.authors.length? (w.authors.slice(0,4).join(", ")+(w.authors.length>4?" et al.":"")) : "—";
   const doi = w.doi? `<a href="${esc(w.doi)}" target="_blank" rel="noopener">DOI</a>` : "";
-  const chips = (w.topics||[]).slice(0,4).map(tp=>`<span class="chip" onclick="quickSearch('${esc(tp.name).replace(/'/g,"&#39;")}')">${esc(tp.name)}</span>`).join("");
+  const chips = (w.topics||[]).slice(0,4).map(tp=>`<span class="chip" data-q="${esc(tp.name)}">${esc(tp.name)}</span>`).join("");
   const absH = w.abstract? `<div class="abstract clamp" id="abs${i}">${highlight(w.abstract,terms)}</div>
       <button class="toggle-abs" onclick="toggleAbs(${i})">${esc(t("art.more"))}</button>` :
       `<div class="abstract" style="color:var(--ink-faint);font-style:italic">${esc(t("art.noabstract"))}</div>`;
@@ -1179,6 +1228,9 @@ function articleHTML(w, terms, i){
 }
 window.toggleAbs=function(i){ const el=document.getElementById("abs"+i); const btn=el.nextElementSibling;
   const cl=el.classList.toggle("clamp"); btn.textContent = cl?t("art.more"):t("art.less"); };
+document.getElementById("results").addEventListener("click", e=>{
+  const c=e.target.closest(".chip[data-q]"); if(c) window.quickSearch(c.dataset.q);
+});
 window.quickSearch=function(term){ document.getElementById("q").value='"'+term+'"';
   showTab("search"); searchLimit=50; runSearch(); window.scrollTo({top:0,behavior:"smooth"}); };
 
@@ -1198,19 +1250,25 @@ document.getElementById("btnCsv").onclick=()=>{
   ].map(csvCell).join(","))).join("\r\n");
   const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-  a.download="journal-monitor-export.csv"; a.click();
+  a.download="journal-search-export.csv"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
 };
-function csvCell(v){ v=(v==null?"":String(v)); return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function csvCell(v){ v=(v==null?"":String(v)); if(/^[=+\-@]/.test(v)) v="'"+v; return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
 
 /* Selektoren befüllen */
 function fillSelectors(){
   const jSel=document.getElementById("fJournal");
+  const yf=document.getElementById("fYearFrom"), yt=document.getElementById("fYearTo");
+  // bisherige Auswahl merken; "ganz links/rechts" bleibt am neuen Rand
+  const prevJ=jSel.value, prevF=yf.value, prevT=yt.value;
+  const fAtMin = yf.selectedIndex<=0, tAtMax = yt.selectedIndex<0 || yt.selectedIndex===yt.options.length-1;
   jSel.innerHTML = `<option value="">${esc(t("search.f.alljournals"))}</option>` +
     enabledJournals().map(j=>`<option value="${esc(j.sourceId)}">${esc(j.name)}</option>`).join("");
-  const yf=document.getElementById("fYearFrom"), yt=document.getElementById("fYearTo");
+  if(prevJ && [...jSel.options].some(o=>o.value===prevJ)) jSel.value=prevJ;
   const opts = STATE.years.map(y=>`<option value="${y}">${y}</option>`).join("");
   yf.innerHTML=opts; yt.innerHTML=opts;
-  yf.value=STATE.minYear; yt.value=STATE.maxYear;
+  yf.value = (!fAtMin && STATE.years.includes(+prevF)) ? prevF : STATE.minYear;
+  yt.value = (!tAtMax && STATE.years.includes(+prevT)) ? prevT : STATE.maxYear;
 }
 
 /* ============================================================
@@ -1301,6 +1359,8 @@ function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp
    Init
    ============================================================ */
 (async function init(){
+ try{
+  if(!(await DB.probe())){ store = MEMSTORE; usingMem = true; }
   LANG = (await store.getMeta("lang")) || "en";
   LOCALE = (LANG==="de") ? "de-DE" : "en-US";
   const tg=document.getElementById("langToggle");
@@ -1322,6 +1382,10 @@ function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp
   renderSourcesTable();
   renderOverview();
   runSearch();
+ }catch(e){
+  console.error(e);
+  setNotice("dataNotice", "Startup error: "+e.message, "err");
+ }
 })();
 </script>
 </body>

@@ -265,6 +265,24 @@ svg.linechart .pt:hover{r:5.5}
 /* ---------- Zeitschriften hinzufügen ---------- */
 .add-journal{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
 .csv-import{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.set-manage{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.set-manage .csv-hint{margin:0 0 8px}
+.set-list{display:flex;flex-direction:column;gap:5px;margin:4px 0 12px}
+.set-item{display:flex;gap:12px;align-items:baseline;font-size:13px;flex-wrap:wrap}
+.set-item .ct{color:var(--ink-faint);font-size:12px}
+.setbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
+.setbar-label{font-size:12px;color:var(--ink-soft);font-weight:500;margin-right:4px}
+.setbar-empty{font-size:12.5px;color:var(--ink-faint)}
+.setchip{font-size:12.5px;border:1px solid var(--line);background:var(--paper-2);color:var(--ink-soft);
+  border-radius:100px;padding:4px 12px;cursor:pointer;font-family:inherit}
+.setchip:hover{border-color:var(--accent);color:var(--accent)}
+.setchip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.setchip .ct{opacity:.75;font-size:11px;margin-left:4px}
+.setpill{font-size:11px;border:1px solid var(--line);background:transparent;color:var(--ink-faint);
+  border-radius:100px;padding:2px 8px;margin:2px 4px 2px 0;cursor:pointer;white-space:nowrap;font-family:inherit}
+.setpill:hover{border-color:var(--accent)}
+.setpill[aria-pressed="true"]{background:rgba(31,92,140,.1);border-color:var(--accent);color:var(--accent)}
+.scope-note{font-size:12px;color:var(--ink-faint);margin:-4px 0 8px}
 .csv-import .csv-title{font-size:12px;color:var(--ink-soft);font-weight:500;margin-bottom:6px}
 .csv-import .csv-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .csv-import .csv-only{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-soft);cursor:pointer}
@@ -346,6 +364,7 @@ svg.linechart .pt:hover{r:5.5}
     <div class="card" id="overviewCard" style="display:none">
       <h2 data-i18n="data.overview.h2">Publication volume per year</h2>
       <p class="lead" data-i18n="data.overview.lead">Number of tracked articles per journal and year — the baseline for all topic shares.</p>
+      <div class="scope-note" id="overviewScope"></div>
       <div class="chart-box"><div id="overviewChart"></div><div class="chart-legend" id="overviewLegend"></div></div>
     </div>
   </section>
@@ -358,6 +377,7 @@ svg.linechart .pt:hover{r:5.5}
         <input type="text" id="q" data-i18n-ph="search.ph" placeholder='Search keyword, e.g.  "news avoidance"' autocomplete="off">
       </div>
       <p class="eyebrow" data-i18n="search.syntax" style="margin-top:8px;text-transform:none;letter-spacing:0;font-size:12px">Space = and · comma or OR = or · minus excludes</p>
+      <div class="setbar" id="setBar"></div>
       <div class="filters">
         <label class="field"><span data-i18n="search.f.journal">Journal</span>
           <select id="fJournal"><option value="">All journals</option></select>
@@ -497,10 +517,24 @@ const I18N = {
   "src.resolveBtn":"Resolve sources again",
   "src.search.label":"Search another journal (name or ISSN)",
   "src.search.ph":"e.g.  Communication Research  or  1940-1612","src.search.btn":"Search",
+  "sets.label":"Journal sets:","sets.all":"All journals",
+  "sets.none":"No sets yet.","sets.goto":"Create sets in the Data tab","sets.manageLink":"Edit sets",
+  "sets.title":"Journal sets",
+  "sets.hint":"Group journals into sets to search only some of them, e.g. by research area. A journal can belong to several sets. Switch sets on and off above the search results; no data needs to be reloaded. Your sets are saved in your browser.",
+  "sets.new.label":"New set","sets.new.ph":"e.g. Health communication","sets.new.btn":"Create set",
+  "sets.count":"{n} journals","sets.rename":"Rename","sets.delete":"Delete",
+  "sets.renamePrompt":"New name for the set:",
+  "sets.deleteConfirm":"Delete the set “{name}”? The journals themselves stay in the list.",
+  "sets.exists":"A set with this name already exists.",
+  "sets.created":"Set “{name}” created. Assign journals to it in the “Sets” column of the table below.",
+  "sets.th":"Sets",
+  "sets.overviewScope":"Showing only journals in: {names}",
+  "sets.emptyScope.title":"No active journals in the selected sets",
+  "sets.emptyScope.body":"Select other sets above, or assign journals to these sets in the <b>Data</b> tab.",
   "src.csv.title":"Load a list of journals from a CSV file",
   "src.csv.import":"Import CSV","src.csv.export":"Export list as CSV",
   "src.csv.only":"Activate only the journals in the file",
-  "src.csv.hint":"One journal per row. A name, an ISSN or an OpenAlex source ID each work on their own; ISSNs give the most reliable match. Comma or semicolon separated, header row optional. To get a template, export the current list.",
+  "src.csv.hint":"One journal per row. A name, an ISSN or an OpenAlex source ID each work on their own; ISSNs give the most reliable match. Comma or semicolon separated, header row optional. An optional “sets” column assigns journals to sets (several separated by “;”). To get a template, export the current list.",
   "src.csv.reading":"Reading file …","src.csv.progress":"Matching journals … {i} of {n}",
   "src.csv.empty":"No journals found in the file. Put one journal per row (name, ISSN or OpenAlex source ID).",
   "src.csv.done":"Imported: {added} added, {existing} already in the list.",
@@ -602,10 +636,24 @@ const I18N = {
   "src.resolveBtn":"Quellen neu auflösen",
   "src.search.label":"Weitere Zeitschrift suchen (Name oder ISSN)",
   "src.search.ph":"z. B.  Communication Research  oder  1940-1612","src.search.btn":"Suchen",
+  "sets.label":"Zeitschriften-Sets:","sets.all":"Alle Zeitschriften",
+  "sets.none":"Noch keine Sets.","sets.goto":"Sets im Daten-Tab anlegen","sets.manageLink":"Sets bearbeiten",
+  "sets.title":"Zeitschriften-Sets",
+  "sets.hint":"Fasse Zeitschriften zu Sets zusammen, um nur in einem Teil von ihnen zu suchen, z. B. nach Forschungsfeld. Eine Zeitschrift kann zu mehreren Sets gehören. Die Sets schaltest du über den Suchergebnissen an und ab; dafür muss nichts neu geladen werden. Deine Sets werden im Browser gespeichert.",
+  "sets.new.label":"Neues Set","sets.new.ph":"z. B. Gesundheitskommunikation","sets.new.btn":"Set anlegen",
+  "sets.count":"{n} Zeitschriften","sets.rename":"Umbenennen","sets.delete":"Löschen",
+  "sets.renamePrompt":"Neuer Name für das Set:",
+  "sets.deleteConfirm":"Das Set „{name}“ löschen? Die Zeitschriften selbst bleiben in der Liste.",
+  "sets.exists":"Ein Set mit diesem Namen gibt es schon.",
+  "sets.created":"Set „{name}“ angelegt. Ordne ihm in der Spalte „Sets“ der Tabelle unten Zeitschriften zu.",
+  "sets.th":"Sets",
+  "sets.overviewScope":"Gezeigt werden nur Zeitschriften aus: {names}",
+  "sets.emptyScope.title":"Keine aktiven Zeitschriften in den gewählten Sets",
+  "sets.emptyScope.body":"Wähle oben andere Sets oder ordne diesen Sets im Tab <b>Daten</b> Zeitschriften zu.",
   "src.csv.title":"Liste von Zeitschriften aus einer CSV-Datei laden",
   "src.csv.import":"CSV importieren","src.csv.export":"Liste als CSV exportieren",
   "src.csv.only":"Nur die Zeitschriften aus der Datei aktivieren",
-  "src.csv.hint":"Eine Zeitschrift pro Zeile. Name, ISSN oder OpenAlex-Source-ID genügen jeweils allein; ISSNs ergeben die zuverlässigste Zuordnung. Komma- oder semikolongetrennt, Kopfzeile optional. Als Vorlage einfach die aktuelle Liste exportieren.",
+  "src.csv.hint":"Eine Zeitschrift pro Zeile. Name, ISSN oder OpenAlex-Source-ID genügen jeweils allein; ISSNs ergeben die zuverlässigste Zuordnung. Komma- oder semikolongetrennt, Kopfzeile optional. Eine optionale Spalte „sets“ ordnet Zeitschriften Sets zu (mehrere durch „;“ getrennt). Als Vorlage einfach die aktuelle Liste exportieren.",
   "src.csv.reading":"Datei wird gelesen …","src.csv.progress":"Zeitschriften werden zugeordnet … {i} von {n}",
   "src.csv.empty":"Keine Zeitschriften in der Datei gefunden. Bitte eine Zeitschrift pro Zeile angeben (Name, ISSN oder OpenAlex-Source-ID).",
   "src.csv.done":"Importiert: {added} hinzugefügt, {existing} bereits in der Liste.",
@@ -666,7 +714,7 @@ async function setLang(lang){
 }
 function refreshDynamic(){
   fillSelectors(); renderStatus(); renderJournalsRow(); renderSourcesTable();
-  renderOverview(); runSearch();
+  renderOverview(); runSearch(); renderSetBar();
 }
 const API = "https://api.openalex.org";
 const SELECT = ["id","title","display_name","publication_date","publication_year","authorships",
@@ -924,6 +972,136 @@ function afterJournalsChanged(){
   renderOverview();
   renderStatus();
   runSearch();
+  renderSetBar();
+}
+
+/* ============================================================
+   Zeitschriften-Sets: frei benannte Gruppen von Zeitschriften,
+   mit denen sich die Suche auf einen Teil der Zeitschriften
+   beschränken lässt. Jede Person verwaltet ihre eigenen Sets
+   (im Browser gespeichert). Die drei Startsets werden nur
+   einmalig angelegt und können geändert oder gelöscht werden.
+   ============================================================ */
+let SETS = [];               // [{id, name, keys:[Zeitschriften-Key]}]
+let ACTIVE_SETS = new Set(); // in der Suche gewählte Set-IDs
+const DEFAULT_SETS = [
+  { id:"set-general", name:"Allgemein",
+    keys:["jcomm","commresearch","scm","mac","jobem","jcmc","ics","newmedia","smsociety"] },
+  { id:"set-jpc", name:"Journalism & Political Communication",
+    keys:["journalism","jstudies","jpractice","digital","jmcq","ijpp","polcomm","ijpor","poq"] },
+  { id:"set-mpsy", name:"Media Psychology", keys:["jmp","mediapsych"] },
+];
+async function loadSets(){
+  let sets = await store.getMeta("sets");
+  if(!Array.isArray(sets)){
+    sets = (await store.getMeta("setsSeeded")) ? [] : DEFAULT_SETS.map(x=>({id:x.id, name:x.name, keys:x.keys.slice()}));
+    await store.setMeta("sets", sets);
+    await store.setMeta("setsSeeded", true);
+  }
+  SETS = sets;
+  const act = (await store.getMeta("activeSets")) || [];
+  ACTIVE_SETS = new Set(act.filter(id=>SETS.some(x=>x.id===id)));
+}
+async function saveSets(){
+  await store.setMeta("sets", SETS);
+  await store.setMeta("activeSets", [...ACTIVE_SETS]);
+}
+function cleanSetName(n){ return (n||"").replace(/;/g," ").replace(/\s+/g," ").trim().slice(0,60); }
+function setByName(name){ const l=name.toLowerCase(); return SETS.find(x=>x.name.toLowerCase()===l); }
+function newSet(name){
+  const st={id:"set-"+Date.now().toString(36)+Math.random().toString(36).slice(2,6), name, keys:[]};
+  SETS.push(st); return st;
+}
+function setsOfJournal(key){ return SETS.filter(x=>x.keys.includes(key)); }
+/* aktive Zeitschriften innerhalb der gewählten Sets (ohne Auswahl: alle aktiven) */
+function scopedJournals(){
+  const en = enabledJournals();
+  if(!ACTIVE_SETS.size) return en;
+  const keys=new Set();
+  for(const st of SETS) if(ACTIVE_SETS.has(st.id)) st.keys.forEach(k=>keys.add(k));
+  return en.filter(j=>keys.has(j.key));
+}
+function scopedWorks(){
+  if(!ACTIVE_SETS.size) return STATE.cWorks;
+  const ids=new Set(scopedJournals().map(j=>j.sourceId));
+  return STATE.cWorks.filter(w=>ids.has(w.sourceId));
+}
+function onScopeChanged(){
+  searchLimit=50;
+  fillSelectors(); runSearch(); renderOverview(); renderSetBar();
+}
+
+/* Set-Leiste in der Suche */
+function renderSetBar(){
+  const el=document.getElementById("setBar"); if(!el) return;
+  const label=`<span class="setbar-label">${esc(t("sets.label"))}</span>`;
+  if(!SETS.length){
+    el.innerHTML = label + `<span class="setbar-empty">${esc(t("sets.none"))}</span>
+      <button class="linkbtn" id="setGoData">${esc(t("sets.goto"))}</button>`;
+  } else {
+    const enKeys=new Set(enabledJournals().map(j=>j.key));
+    el.innerHTML = label +
+      `<button class="setchip" data-set="" aria-pressed="${!ACTIVE_SETS.size}">${esc(t("sets.all"))}</button>` +
+      SETS.map(st=>`<button class="setchip" data-set="${esc(st.id)}" aria-pressed="${ACTIVE_SETS.has(st.id)}">${esc(st.name)}<span class="ct">${st.keys.filter(k=>enKeys.has(k)).length}</span></button>`).join("") +
+      `<button class="linkbtn" id="setGoData" style="margin-left:6px">${esc(t("sets.manageLink"))}</button>`;
+    el.querySelectorAll(".setchip").forEach(b=>b.onclick=async()=>{
+      const id=b.dataset.set;
+      if(!id) ACTIVE_SETS.clear();
+      else if(ACTIVE_SETS.has(id)) ACTIVE_SETS.delete(id);
+      else ACTIVE_SETS.add(id);
+      await saveSets(); onScopeChanged();
+    });
+  }
+  document.getElementById("setGoData").onclick=()=>{
+    showTab("data");
+    const m=document.getElementById("setManage"); if(m) m.scrollIntoView({behavior:"smooth", block:"start"});
+  };
+}
+
+/* Set-Verwaltung im Daten-Tab */
+function renderSetManager(){
+  const el=document.getElementById("setManage"); if(!el) return;
+  const known=new Set(JOURNALS.map(j=>j.key));
+  el.innerHTML = `<div class="csv-title">${esc(t("sets.title"))}</div>
+    <p class="csv-hint">${esc(t("sets.hint"))}</p>
+    <div class="set-list">${SETS.map(st=>`<div class="set-item">
+        <b>${esc(st.name)}</b><span class="ct">${esc(t("sets.count",{n:st.keys.filter(k=>known.has(k)).length}))}</span>
+        <button class="linkbtn" data-setren="${esc(st.id)}">${esc(t("sets.rename"))}</button>
+        <button class="linkbtn" data-setdel="${esc(st.id)}" style="color:var(--danger)">${esc(t("sets.delete"))}</button>
+      </div>`).join("")}</div>
+    <div class="add-journal">
+      <label class="field grow" style="max-width:320px">${esc(t("sets.new.label"))}
+        <input type="text" id="setNewName" placeholder="${esc(t("sets.new.ph"))}" maxlength="60" autocomplete="off">
+      </label>
+      <button class="btn sm" id="btnSetNew">${esc(t("sets.new.btn"))}</button>
+    </div>
+    <div id="setNotice"></div>`;
+
+  const create=async()=>{
+    const inp=document.getElementById("setNewName");
+    const name=cleanSetName(inp.value); if(!name) return;
+    if(setByName(name)){ setNotice("setNotice", t("sets.exists"), "err"); return; }
+    newSet(name); await saveSets();
+    renderSourcesTable(); renderSetBar();
+    setNotice("setNotice", t("sets.created",{name}), "ok");
+  };
+  document.getElementById("btnSetNew").onclick=create;
+  document.getElementById("setNewName").addEventListener("keydown", e=>{ if(e.key==="Enter") create(); });
+
+  el.querySelectorAll("[data-setren]").forEach(b=>b.onclick=async()=>{
+    const st=SETS.find(x=>x.id===b.dataset.setren); if(!st) return;
+    const raw=prompt(t("sets.renamePrompt"), st.name); if(raw===null) return;
+    const name=cleanSetName(raw); if(!name || name===st.name) return;
+    const other=setByName(name); if(other && other!==st){ setNotice("setNotice", t("sets.exists"), "err"); return; }
+    st.name=name; await saveSets();
+    renderSourcesTable(); renderSetBar(); renderOverview();
+  });
+  el.querySelectorAll("[data-setdel]").forEach(b=>b.onclick=async()=>{
+    const st=SETS.find(x=>x.id===b.dataset.setdel); if(!st) return;
+    if(!confirm(t("sets.deleteConfirm",{name:st.name}))) return;
+    SETS=SETS.filter(x=>x!==st); ACTIVE_SETS.delete(st.id); await saveSets();
+    renderSourcesTable(); onScopeChanged();
+  });
 }
 
 /* ============================================================
@@ -979,8 +1157,10 @@ function renderSourcesTable(){
       <p class="csv-hint">${esc(t("src.csv.hint"))}</p>
       <div id="csvNotice"></div>
     </div>
+    <div class="set-manage" id="setManage"></div>
     <table class="toptopics" style="margin-top:14px"><thead><tr>
-      <th style="width:38px">${esc(t("src.th.active"))}</th><th>${esc(t("src.th.journal"))}</th><th>${esc(t("src.th.source"))}</th>
+      <th style="width:38px">${esc(t("src.th.active"))}</th><th>${esc(t("src.th.journal"))}</th>
+      ${SETS.length?`<th>${esc(t("sets.th"))}</th>`:""}<th>${esc(t("src.th.source"))}</th>
       <th class="num">${esc(t("src.th.tracked"))}</th><th>${esc(t("src.th.sourceid"))}</th><th></th>
     </tr></thead><tbody>` + JOURNALS.map(j=>{
       const status = j.sourceId
@@ -990,6 +1170,7 @@ function renderSourcesTable(){
         <td><input type="checkbox" class="jen" data-k="${esc(j.key)}" ${j.enabled?"checked":""}></td>
         <td><b>${esc(j.name)}</b>${j.custom?` <span class="tagcustom">${esc(t("src.custom"))}</span>`:""}
             ${j.issns&&j.issns.length?`<div class="mono" ${faint}>ISSN ${esc(j.issns.join(" / "))}</div>`:""}</td>
+        ${SETS.length?`<td style="max-width:260px">${SETS.map(st=>`<button class="setpill" data-set="${esc(st.id)}" data-k="${esc(j.key)}" aria-pressed="${st.keys.includes(j.key)}">${esc(st.name)}</button>`).join("")}</td>`:""}
         <td>${status}</td>
         <td class="num">${j.works!=null?j.works.toLocaleString(LOCALE):"—"}</td>
         <td><input type="text" class="ovr" data-k="${esc(j.key)}" placeholder="S…" value="${esc(j.sourceId||"")}" style="max-width:130px"></td>
@@ -998,6 +1179,16 @@ function renderSourcesTable(){
     }).join("") + `</tbody></table>
     <div style="margin-top:12px"><button class="btn ghost sm" id="btnResolve">${esc(t("src.resolveBtn"))}</button></div>`;
 
+  renderSetManager();
+  // Zeitschrift einem Set zuordnen / aus Set nehmen
+  el.querySelectorAll(".setpill").forEach(b=>b.onclick=async()=>{
+    const st=SETS.find(x=>x.id===b.dataset.set); if(!st) return;
+    const k=b.dataset.k, i=st.keys.indexOf(k);
+    if(i>=0) st.keys.splice(i,1); else st.keys.push(k);
+    b.setAttribute("aria-pressed", String(i<0));
+    await saveSets(); renderSetManager(); renderSetBar();
+    if(ACTIVE_SETS.has(st.id)) onScopeChanged();
+  });
   // An-/Abwählen
   el.querySelectorAll(".jen").forEach(c=>c.onchange=async()=>{
     const j=JOURNALS.find(x=>x.key===c.dataset.k); if(j){ j.enabled=c.checked; await saveJournals(); afterJournalsChanged(); }
@@ -1007,6 +1198,8 @@ function renderSourcesTable(){
     const k=b.dataset.rm; const j=JOURNALS.find(x=>x.key===k);
     if(!confirm(t("src.removeConfirm",{name:(j?j.name:k)}))) return;
     JOURNALS = JOURNALS.filter(x=>x.key!==k);
+    for(const st of SETS) st.keys = st.keys.filter(x=>x!==k);
+    await saveSets();
     const fm=(await getFetchedMap()); if(j&&j.sourceId) delete fm[j.sourceId];
     await store.setMeta("fetchedFrom", fm);
     await saveJournals(); renderSourcesTable(); afterJournalsChanged();
@@ -1080,7 +1273,8 @@ const CSV_MAX_ROWS = 300;
 const ISSN_RE = /^\d{4}-?\d{3}[\dXx]$/;
 const SID_RE  = /^(?:https?:\/\/(?:api\.)?openalex\.org\/(?:sources\/)?)?(S\d+)$/i;
 const FLAG_RE = /^(yes|no|ja|nein|true|false|x|1|0)$/i;
-const HEADER_RE = /^(name|journal|journal name|journal title|title|titel|zeitschrift|issn|issns|e-?issn|p-?issn|issn[-_ ]?l|source|source[-_ ]?id|openalex|openalex[-_ ]?(source[-_ ]?)?id|id|active|aktiv|enabled)$/i;
+const HEADER_RE = /^(name|journal|journal name|journal title|title|titel|zeitschrift|issn|issns|e-?issn|p-?issn|issn[-_ ]?l|source|source[-_ ]?id|openalex|openalex[-_ ]?(source[-_ ]?)?id|id|active|aktiv|enabled|sets?|themen-?sets?|journal[-_ ]?sets?)$/i;
+const SETCOL_RE = /^(sets?|themen-?sets?|journal[-_ ]?sets?)$/i;
 
 function normIssn(x){ x=x.replace(/-/g,"").toUpperCase(); return x.slice(0,4)+"-"+x.slice(4); }
 
@@ -1161,8 +1355,16 @@ async function importJournalCSV(file, onlyImported){
   try{
     say(t("src.csv.reading"));
     let rows = parseCSV(await readFileText(file));
-    if(rows.length && rows[0].every(c=>!c.trim() || HEADER_RE.test(c.trim()))) rows=rows.slice(1);   // Kopfzeile
-    let entries = rows.map(rowToEntry).filter(Boolean);
+    let setCol=-1;
+    if(rows.length && rows[0].every(c=>!c.trim() || HEADER_RE.test(c.trim()))){   // Kopfzeile
+      setCol = rows[0].findIndex(c=>SETCOL_RE.test(c.trim()));
+      rows = rows.slice(1);
+    }
+    let entries = rows.map(r=>{
+      const e = rowToEntry(setCol>=0 ? r.filter((_,i)=>i!==setCol) : r);
+      if(e && setCol>=0) e.sets = (r[setCol]||"").split(";").map(cleanSetName).filter(Boolean);
+      return e;
+    }).filter(Boolean);
     if(!entries.length){ say(t("src.csv.empty"), "err"); return; }
     const truncated = entries.length > CSV_MAX_ROWS;
     if(truncated) entries = entries.slice(0, CSV_MAX_ROWS);
@@ -1188,12 +1390,20 @@ async function importJournalCSV(file, onlyImported){
       }
       importedKeys.add(j.key);   // doppelte Zeilen zählen nur einmal
       if(e.active===false) inactiveKeys.add(j.key);
+      if(e.sets){   // Set-Zugehörigkeit dieser Zeitschrift genau wie in der Datei
+        const want=new Set(e.sets.map(n=>(setByName(n)||newSet(n)).id));
+        for(const st of SETS){
+          const has=st.keys.includes(j.key);
+          if(want.has(st.id) && !has) st.keys.push(j.key);
+          if(!want.has(st.id) && has) st.keys=st.keys.filter(x=>x!==j.key);
+        }
+      }
     }
     for(const j of JOURNALS){
       if(importedKeys.has(j.key)) j.enabled = !inactiveKeys.has(j.key);
       else if(onlyImported) j.enabled = false;
     }
-    await saveJournals();
+    await saveJournals(); await saveSets();
     renderSourcesTable(); afterJournalsChanged();
     let msg = t("src.csv.done",{added, existing: importedKeys.size-added});
     if(notFound.length) msg += t("src.csv.notfound",{list: notFound.slice(0,8).join(", ") + (notFound.length>8?" …":"")});
@@ -1205,9 +1415,10 @@ async function importJournalCSV(file, onlyImported){
 }
 
 function exportJournalList(){
-  const head=["name","issn","openalex_source_id","active"];
+  const head=["name","issn","openalex_source_id","active","sets"];
   const lines=[head.join(",")].concat(JOURNALS.map(j=>[
-    j.name, (j.issns||[]).join(" / "), j.sourceId||"", j.enabled?"yes":"no"
+    j.name, (j.issns||[]).join(" / "), j.sourceId||"", j.enabled?"yes":"no",
+    setsOfJournal(j.key).map(st=>st.name).join("; ")
   ].map(csvCell).join(",")));
   downloadCSV("journal-list.csv", lines.join("\r\n"));
 }
@@ -1372,7 +1583,7 @@ function currentFilters(){
 }
 function filteredWorks(){
   const f=currentFilters(); const pq=parseQuery(f.q);
-  let res = STATE.cWorks.filter(w=>{
+  let res = scopedWorks().filter(w=>{
     if(f.journal && w.sourceId!==f.journal) return false;
     if(w.year!=null && (w.year<f.yFrom || w.year>f.yTo)) return false;
     if(pq.groups.length && !matchWork(w,pq)) return false;
@@ -1403,6 +1614,10 @@ function runSearch(){
   if(!STATE.cWorks.length){
     box.innerHTML=`<div class="empty"><div class="big">${esc(t("search.empty.disabled.title"))}</div>
       ${t("search.empty.disabled.body")}</div>`; return;
+  }
+  if(ACTIVE_SETS.size && !scopedJournals().length){
+    box.innerHTML=`<div class="empty"><div class="big">${esc(t("sets.emptyScope.title"))}</div>
+      ${t("sets.emptyScope.body")}</div>`; return;
   }
   if(!res.length){ box.innerHTML=`<div class="empty"><div class="big">${esc(t("search.empty.nomatch.title"))}</div>
     ${t("search.empty.nomatch.body")}</div>`; return; }
@@ -1473,7 +1688,7 @@ function fillSelectors(){
   const prevJ=jSel.value, prevF=yf.value, prevT=yt.value;
   const fAtMin = yf.selectedIndex<=0, tAtMax = yt.selectedIndex<0 || yt.selectedIndex===yt.options.length-1;
   jSel.innerHTML = `<option value="">${esc(t("search.f.alljournals"))}</option>` +
-    enabledJournals().map(j=>`<option value="${esc(j.sourceId)}">${esc(j.name)}</option>`).join("");
+    scopedJournals().map(j=>`<option value="${esc(j.sourceId)}">${esc(j.name)}</option>`).join("");
   if(prevJ && [...jSel.options].some(o=>o.value===prevJ)) jSel.value=prevJ;
   const opts = STATE.years.map(y=>`<option value="${y}">${y}</option>`).join("");
   yf.innerHTML=opts; yt.innerHTML=opts;
@@ -1488,7 +1703,12 @@ function renderOverview(){
   if(!STATE.cWorks || !STATE.cWorks.length){ document.getElementById("overviewCard").style.display="none"; return; }
   document.getElementById("overviewCard").style.display="";
   const en=enabledJournals();
-  const series = en.map((j,idx)=>{
+  const inScope=new Set(scopedJournals().map(j=>j.key));
+  const scopeEl=document.getElementById("overviewScope");
+  if(scopeEl) scopeEl.textContent = ACTIVE_SETS.size
+    ? t("sets.overviewScope",{names:SETS.filter(st=>ACTIVE_SETS.has(st.id)).map(st=>st.name).join(", ")}) : "";
+  // Farbe richtet sich nach der Position in der Gesamtliste, damit sie beim Set-Wechsel gleich bleibt
+  const series = en.map((j,idx)=>({j,idx})).filter(x=>inScope.has(x.j.key)).map(({j,idx})=>{
     const sid=j.sourceId;
     const vals={}; for(const y of STATE.years) vals[y]=0;
     for(const w of STATE.cWorks) if(w.sourceId===sid && vals[w.year]!=null) vals[w.year]++;
@@ -1582,6 +1802,7 @@ function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp
     setNotice("dataNotice", t("mem.warning"), "err");
   }
   await loadJournals();
+  await loadSets();
   const savedKey = await store.getMeta("apikey");
   if(savedKey) document.getElementById("apikey").value = savedKey;
   document.getElementById("apikey").addEventListener("change", e=> store.setMeta("apikey", e.target.value.trim()));
@@ -1592,6 +1813,7 @@ function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp
   renderSourcesTable();
   renderOverview();
   runSearch();
+  renderSetBar();
  }catch(e){
   console.error(e);
   setNotice("dataNotice", "Startup error: "+e.message, "err");
